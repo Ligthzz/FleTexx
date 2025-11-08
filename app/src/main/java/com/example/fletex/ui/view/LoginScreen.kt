@@ -72,7 +72,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { viewModel.login { navController.navigate("welcome") } },
+                onClick = { viewModel.login { navController.navigate("home") } },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933)),
                 modifier = Modifier.fillMaxWidth()
             ) {
