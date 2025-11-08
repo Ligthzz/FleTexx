@@ -62,4 +62,42 @@ dependencies {
 
 // (Opcional) LiveData + Compose
     implementation("androidx.compose.runtime:runtime-livedata")
+    // Iconos adicionales de Material (incluye ArrowForwardIos)
+
+    //para las fotos y weas
+    // --- 📷 CameraX ---
+    implementation("androidx.camera:camera-camera2:1.2.2")
+    implementation("androidx.camera:camera-lifecycle:1.2.2")
+    implementation("androidx.camera:camera-view:1.2.2")
+
+    // --- 🌍 Location Services ---
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // --- 🔐 Accompanist Permissions (para pedir permisos nativos) ---
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+
+    // --- 🖼️ Coil (para cargar imágenes desde URIs o red) ---
+    implementation("io.coil-kt:coil-compose:2.2.2")
+
+    // --- ⚙️ Kotlin Coroutines (para tareas asíncronas como GPS o Bluetooth) ---
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+
+    // --- 🧩 Core KTX (extensiones modernas de Android) ---
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.material3:material3")
+
+    // --- 🌍 Google Maps Compose ---
+    implementation("com.google.maps.android:maps-compose:4.3.3")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+
+
+
+
+
+
+
+
+
+
 }
