@@ -45,7 +45,7 @@ class AuthViewModel : ViewModel() {
     fun login(onSuccess: () -> Unit) {
         if (email.value.isBlank() || password.value.isBlank()) {
             errorMessage.value = "Por favor completa todos los campos"
-        } else if (email.value == "admin@gmail.com" && password.value == "1234") {
+        } else if (email.value == "admin@gmail.com" && password.value == "123456") {
             errorMessage.value = ""
             //login de prueba
             fullName.value = "Administrador"
@@ -66,22 +66,22 @@ class AuthViewModel : ViewModel() {
         onSuccess: () -> Unit
     ) {
         when {
-            fullName.isBlank() || phone.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
-                errorMessage.value = "Completa todos los campos"
-            }
-
-            password != confirmPassword -> {
-                errorMessage.value = "Las contraseñas no coinciden"
-            }
-
+            fullName.isBlank() -> errorMessage.value = "El nombre completo es obligatorio"
+            phone.isBlank() -> errorMessage.value = "El número de teléfono es obligatorio"
+            !phone.matches(Regex("^\\+?\\d{8,15}\$")) -> errorMessage.value = "El teléfono no es válido"
+            email.isBlank() -> errorMessage.value = "El correo electrónico es obligatorio"
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> errorMessage.value = "El formato del correo no es válido"
+            password.length < 6 -> errorMessage.value = "La contraseña debe tener al menos 6 caracteres"
+            password != confirmPassword -> errorMessage.value = "Las contraseñas no coinciden"
             else -> {
-                // Aquí podrías guardar el usuario en BD o Firebase
-                this.fullName.value = fullName //  guardamos el nombre para el Home
+                // Todo correcto
+                this.fullName.value = fullName
                 this.email.value = email
                 errorMessage.value = ""
                 onSuccess()
             }
         }
     }
+
 
 }
