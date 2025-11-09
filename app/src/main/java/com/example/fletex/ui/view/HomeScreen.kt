@@ -33,7 +33,7 @@ fun HomeScreen(navController: NavController, viewModel: AuthViewModel = viewMode
                 .padding(16.dp)
         ) {
 
-            // 🔹 Header
+            //  Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -52,9 +52,9 @@ fun HomeScreen(navController: NavController, viewModel: AuthViewModel = viewMode
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 🔹 Título con nombre dinámico
+            //  Título con nombre dinámico
             Text(
-                text = "Hola ${viewModel.fullName.value.ifEmpty { "Usuario" }},",
+                text = "Hola",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF001B4E)
@@ -95,7 +95,7 @@ fun HomeScreen(navController: NavController, viewModel: AuthViewModel = viewMode
                 dropOff = "2:00PM - 4:00PM",
                 navController = navController
             )
-            // 🔹 Botón para ver usuarios
+            //  Botón para ver usuarios
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = { navController.navigate("users") },
@@ -112,53 +112,82 @@ fun HomeScreen(navController: NavController, viewModel: AuthViewModel = viewMode
 }
 
 @Composable
-fun FleteCard(title: String, pickUp: String, dropOff: String, navController: NavController ) {
+fun FleteCard(
+    title: String,
+    pickUp: String,
+    dropOff: String,
+    navController: NavController
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp),
+            .padding(vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF001B4E))
-            Spacer(modifier = Modifier.height(4.dp))
+            //  Título
+            Text(
+                text = title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            //  Horarios
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("Tomar", fontSize = 12.sp, color = Color.Gray)
+                    Text("Recogida", fontSize = 12.sp, color = Color.Gray)
                     Text(pickUp, fontWeight = FontWeight.SemiBold)
                 }
                 Column {
-                    Text("Drop-Off", fontSize = 12.sp, color = Color.Gray)
+                    Text("Entrega", fontSize = 12.sp, color = Color.Gray)
                     Text(dropOff, fontWeight = FontWeight.SemiBold)
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+
+            // Botones
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(
-                    onClick =  { navController.navigate("fleteDetail") } ,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCCE4FF))
+                    onClick = { navController.navigate("fleteDetail") },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(45.dp)
                 ) {
-                    Text("detalles", color = Color(0xFF001B4E))
+                    Text("Detalles", color = MaterialTheme.colorScheme.onPrimary)
                 }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
                 Button(
                     onClick = { /* reservar */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3366FF))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(45.dp)
                 ) {
-                    Text("Tomar ahora", color = Color.White)
+                    Text("Tomar ahora", color = MaterialTheme.colorScheme.onSecondary)
                 }
             }
-
         }
     }
 }
+
+

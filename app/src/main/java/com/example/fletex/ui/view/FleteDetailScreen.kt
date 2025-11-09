@@ -32,7 +32,7 @@ fun FleteDetailScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // 🔹 Header con botón de cerrar
+            //  Header con botón de cerrar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -51,7 +51,7 @@ fun FleteDetailScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🔹 Título
+            //  Título
             Text(
                 text = "Descripción del flete",
                 fontWeight = FontWeight.Bold,
@@ -61,7 +61,7 @@ fun FleteDetailScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 🔹 Imagen del camión
+            //  Imagen del camión
             Image(
                 painter = painterResource(id = R.drawable.cami), // reemplaza con tu imagen de camión
                 contentDescription = "Camión",
@@ -72,7 +72,7 @@ fun FleteDetailScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🔹 Detalles de ubicación
+            //  Detalles de ubicación
             Text(
                 text = "McWay Falls, Big Sur, California",
                 fontWeight = FontWeight.Bold,
@@ -83,7 +83,7 @@ fun FleteDetailScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🔹 Botones de información
+            //  Botones de información
             Button(
                 onClick = { /* datos del conductor */ },
                 modifier = Modifier
@@ -110,7 +110,7 @@ fun FleteDetailScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // 🔹 Botones inferiores
+            //  Botones inferiores
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween

@@ -31,7 +31,7 @@ fun CameraPreviewScreen(
     val imageCapture = remember { ImageCapture.Builder().build() }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // 🔹 Botón cerrar
+        //  Botón cerrar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
