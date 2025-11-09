@@ -37,6 +37,8 @@ class MainActivity : ComponentActivity() {
                             composable("fleteDetail") { FleteDetailScreen(navController) }
                             composable("chat") { ChatScreen(navController) }
                             composable("rutaScreen") { RutaScreen(navController) } // ✅ CORRECTO
+                            composable("users") { UserListScreen(navController) }
+
                         }
                     }
 

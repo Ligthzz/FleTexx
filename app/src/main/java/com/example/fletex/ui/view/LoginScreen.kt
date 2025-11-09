@@ -1,5 +1,6 @@
 package com.example.fletex.ui.view
 
+import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -18,6 +20,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.example.fletex.R
 import com.example.fletex.ui.viewmodel.AuthViewModel
@@ -26,7 +30,16 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
+fun LoginScreen(navController: NavController) {
+    val context = LocalContext.current
+
+    // ✅ ViewModel con Application para Room
+    val viewModel: AuthViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { AuthViewModel(context.applicationContext as Application) }
+        }
+    )
+
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var emailError by remember { mutableStateOf(false) }
@@ -46,6 +59,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                // Logo
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo Fletex",
@@ -62,10 +76,11 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+                // ✉️ Email
                 OutlinedTextField(
                     value = viewModel.email.value,
                     onValueChange = {
-                        viewModel.onEmailChange(it)
+                        viewModel.email.value = it
                         emailError = !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
                     },
                     isError = emailError,
@@ -82,10 +97,11 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // 🔒 Contraseña
                 OutlinedTextField(
                     value = viewModel.password.value,
                     onValueChange = {
-                        viewModel.onPasswordChange(it)
+                        viewModel.password.value = it
                         passwordError = it.length < 6
                     },
                     isError = passwordError,
@@ -110,6 +126,9 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                 Button(
                     onClick = {
                         if (!emailError && !passwordError) {
+                            viewModel.email.value = viewModel.email.value.trim()
+                            viewModel.password.value = viewModel.password.value.trim()
+
                             viewModel.login {
                                 scope.launch {
                                     snackbarHostState.showSnackbar("Bienvenido ${viewModel.fullName.value.ifBlank { "👋" }}")
@@ -138,7 +157,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                     )
                 }
 
-                //  Texto para ir al registro
+                // 🔸 Ir al registro
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
                     horizontalArrangement = Arrangement.Center,
