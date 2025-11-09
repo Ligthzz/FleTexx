@@ -95,6 +95,18 @@ fun HomeScreen(navController: NavController, viewModel: AuthViewModel = viewMode
                 dropOff = "2:00PM - 4:00PM",
                 navController = navController
             )
+            // 🔹 Botón para ver usuarios
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = { navController.navigate("users") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF001B4E)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Text("Ver usuarios registrados", color = Color.White)
+            }
+
         }
     }
 }
@@ -146,6 +158,7 @@ fun FleteCard(title: String, pickUp: String, dropOff: String, navController: Nav
                     Text("Tomar ahora", color = Color.White)
                 }
             }
+
         }
     }
 }
