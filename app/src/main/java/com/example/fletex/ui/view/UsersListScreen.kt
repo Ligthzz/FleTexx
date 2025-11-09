@@ -29,7 +29,7 @@ fun UserListScreen(navController: NavController) {
 
     var users by remember { mutableStateOf(listOf<User>()) }
 
-    // 📦 Cargar usuarios al iniciar
+    //  Cargar usuarios al iniciar
     LaunchedEffect(Unit) {
         scope.launch {
             users = repository.getAllUsers()
@@ -46,7 +46,7 @@ fun UserListScreen(navController: NavController) {
                 .padding(16.dp)
         ) {
 
-            // 🔹 Header con botón de volver
+            //  Header con botón de volver
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

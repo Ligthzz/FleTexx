@@ -34,7 +34,7 @@ fun RutaScreen(navController: NavController, viewModel: MainViewModel = viewMode
     val locationPermission = rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
     val location by viewModel.location.collectAsState()
 
-    // 🔹 Solicitar permiso y activar actualizaciones cuando esté concedido
+    //  Solicitar permiso y activar actualizaciones cuando esté concedido
     LaunchedEffect(locationPermission.status.isGranted) {
         if (locationPermission.status.isGranted) {
             viewModel.startLocationUpdates()
@@ -43,7 +43,7 @@ fun RutaScreen(navController: NavController, viewModel: MainViewModel = viewMode
         }
     }
 
-    // 🔹 Coordenadas fijas en San Bernardo
+    //  Coordenadas fijas en San Bernardo
     val startLatLng = LatLng(-33.5939, -70.6996) // Plaza de San Bernardo
     val endLatLng = LatLng(-33.5745, -70.7068)   // Av. Portales
 
@@ -135,7 +135,7 @@ fun RutaScreen(navController: NavController, viewModel: MainViewModel = viewMode
                         snippet = "Av. Portales 2785"
                     )
 
-                    // 📍 Ubicación actual (si está activa)
+                    //  Ubicación actual (si está activa)
                     location?.let {
                         Marker(
                             state = MarkerState(position = LatLng(it.latitude, it.longitude)),

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    // 📷 Cámara
+    //  Cámara
     private val _photoUri = MutableStateFlow<Uri?>(null)
     val photoUri: StateFlow<Uri?> = _photoUri
 
@@ -23,7 +23,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _photoUri.value = uri
     }
 
-    // 📍 Ubicación (GPS)
+    //  Ubicación (GPS)
     private val fusedLocationClient =
         LocationServices.getFusedLocationProviderClient(application)
 
@@ -34,14 +34,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun startLocationUpdates() {
         val context = getApplication<Application>()
 
-        // ✅ Verifica permiso antes de iniciar
+        //  Verifica permiso antes de iniciar
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
 
-            // 🩵 Compatibilidad total con todas las versiones
+            //  Compatibilidad total con todas las versiones
             @Suppress("DEPRECATION")
             val locationRequest = LocationRequest.create().apply {
                 interval = 10000L            // cada 10 segundos

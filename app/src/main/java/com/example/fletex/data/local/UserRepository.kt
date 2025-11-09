@@ -20,4 +20,9 @@ class UserRepository(context: Context) {
         userDao.login(email, password)
 
     suspend fun getAllUsers(): List<User> = userDao.getAllUsers()
+
+    //  Nuevo método para cargar el perfil según el correo
+    suspend fun getUserByEmail(email: String): User? {
+        return userDao.getUserByEmail(email)
+    }
 }

@@ -67,7 +67,7 @@ fun ChatScreen(navController: NavController, viewModel: MainViewModel = viewMode
                     .fillMaxSize()
                     .padding(12.dp)
             ) {
-                // 🔹 Header
+                //  Header
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -89,7 +89,7 @@ fun ChatScreen(navController: NavController, viewModel: MainViewModel = viewMode
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 🔹 Mensaje de ejemplo
+                // Mensaje de ejemplo
                 Text(
                     text = "Hola, ¿listo para el viaje?",
                     fontSize = 16.sp,
@@ -97,7 +97,7 @@ fun ChatScreen(navController: NavController, viewModel: MainViewModel = viewMode
                     modifier = Modifier.padding(8.dp)
                 )
 
-                // 🔹 Imagen capturada
+                //  Imagen capturada
                 photoUri?.let {
                     AsyncImage(
                         model = it,
@@ -112,11 +112,11 @@ fun ChatScreen(navController: NavController, viewModel: MainViewModel = viewMode
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // 🔹 Barra inferior
+                //  Barra inferior
                 ChatInputBar(
                     onSend = { /* TODO chat real */ },
                     onCameraClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
-                    onMicClick = { /* TODO audio */ }
+
                 )
             }
         }
@@ -126,8 +126,7 @@ fun ChatScreen(navController: NavController, viewModel: MainViewModel = viewMode
 @Composable
 fun ChatInputBar(
     onSend: (String) -> Unit,
-    onCameraClick: () -> Unit,
-    onMicClick: () -> Unit
+    onCameraClick: () -> Unit
 ) {
     var message by remember { mutableStateOf("") }
 
@@ -135,25 +134,17 @@ fun ChatInputBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFDCEEFF), RoundedCornerShape(50))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextField(
             value = message,
             onValueChange = { message = it },
-            placeholder = {
-                Text(
-                    text = "Escribir algo...",
-                    color = Color(0xFF001B4E)
-                )
-            },
-            modifier = Modifier
-                .weight(1f)
-                .padding(4.dp),
+            placeholder = { Text("Escribir mensaje...", color = Color(0xFF001B4E)) },
+            modifier = Modifier.weight(1f),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent
+                unfocusedContainerColor = Color.Transparent
             ),
             maxLines = 1,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -165,16 +156,12 @@ fun ChatInputBar(
             })
         )
 
-
         IconButton(onClick = onCameraClick) {
             Icon(Icons.Default.CameraAlt, contentDescription = "Cámara", tint = Color(0xFF001B4E))
         }
-
-        IconButton(onClick = onMicClick) {
-            Icon(Icons.Default.Mic, contentDescription = "Micrófono", tint = Color(0xFF001B4E))
-        }
     }
 }
+
 
 @Composable
 fun CameraPreview(

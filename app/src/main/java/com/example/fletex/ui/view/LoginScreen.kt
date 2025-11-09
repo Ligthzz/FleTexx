@@ -1,6 +1,7 @@
 package com.example.fletex.ui.view
 
 import android.app.Application
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
 fun LoginScreen(navController: NavController) {
     val context = LocalContext.current
 
-    // ✅ ViewModel con Application para Room
+    // ViewModel con Application para Room
     val viewModel: AuthViewModel = viewModel(
         factory = viewModelFactory {
             initializer { AuthViewModel(context.applicationContext as Application) }
@@ -76,7 +77,7 @@ fun LoginScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // ✉️ Email
+                //  Email
                 OutlinedTextField(
                     value = viewModel.email.value,
                     onValueChange = {
@@ -97,7 +98,7 @@ fun LoginScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // 🔒 Contraseña
+                //  Contraseña
                 OutlinedTextField(
                     value = viewModel.password.value,
                     onValueChange = {
@@ -122,16 +123,17 @@ fun LoginScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 🧡 Botón de inicio de sesión
+                //  Botón de inicio de sesión
+                //  Estado de carga
+                var isLoading by remember { mutableStateOf(false) }
+
+//  Botón con animación y loader
                 Button(
                     onClick = {
                         if (!emailError && !passwordError) {
-                            viewModel.email.value = viewModel.email.value.trim()
-                            viewModel.password.value = viewModel.password.value.trim()
-
                             viewModel.login {
                                 scope.launch {
-                                    snackbarHostState.showSnackbar("Bienvenido ${viewModel.fullName.value.ifBlank { "👋" }}")
+                                    snackbarHostState.showSnackbar("Bienvenido/a ${viewModel.fullName.value.ifBlank { "👋" }}")
                                     delay(1200)
                                     navController.navigate("home")
                                 }
@@ -141,13 +143,26 @@ fun LoginScreen(navController: NavController) {
                                 "Por favor corrige los campos antes de continuar"
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933)),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp) // fija el alto del botón para evitar recortes
+                        .animateContentSize(), // suaviza la transición texto ↔ loader
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933))
                 ) {
-                    Text("Iniciar Sesión", color = Color.White)
+                    if (viewModel.isLoading.value) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Iniciar Sesión", color = Color.White)
+                    }
                 }
 
-                // ⚠️ Mensaje general de error
+
+
+                //  Mensaje general de error
                 if (viewModel.errorMessage.value.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
@@ -157,7 +172,7 @@ fun LoginScreen(navController: NavController) {
                     )
                 }
 
-                // 🔸 Ir al registro
+                //  Ir al registro
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
                     horizontalArrangement = Arrangement.Center,
