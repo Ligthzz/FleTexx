@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
 
                         }
 
-                            // 🔹 Barra inferior visible solo en pantallas principales
+                            //  Barra inferior visible solo en pantallas principales
                         if (currentRoute in listOf("home", "chat", "perfil")) {
                             BottomNavBar(navController = navController, currentRoute = currentRoute)
                         }

@@ -1,7 +1,6 @@
 package com.example.fletex.ui.view
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,95 +17,105 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.fletex.R
+import com.example.fletex.ui.components.FletexScaffold
 import com.example.fletex.ui.viewmodel.AuthViewModel
 
 @Composable
-fun HomeScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
+fun HomeScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = viewModel()
+) {
+    val userName = viewModel.getUserName()
 
-    Surface(
-        color = Color(0xFFE6F4FA),
-        modifier = Modifier.fillMaxSize()
+    FletexScaffold(
+        navController = navController,
+        userName = userName
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
 
-            //  Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Surface(
+            color = Color(0xFFE6F4FA),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo Fletex",
-                    modifier = Modifier.size(60.dp)
+
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "Logo Fletex",
+                        modifier = Modifier.size(60.dp)
+                    )
+
+
+
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Título con nombre dinámico
+                Text(
+                    text = "Hola", //<-- programar nombre
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF001B4E)
                 )
 
-                IconButton(onClick = { /* abrir menú lateral */ }) {
-                    Icon(Icons.Default.Menu, contentDescription = "Menú")
+                Text(
+                    text = "¿Qué flete te gustaría tomar?",
+                    fontSize = 18.sp,
+                    color = Color(0xFF001B4E)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Buscador
+                OutlinedTextField(
+                    value = "",
+                    onValueChange = {},
+                    placeholder = { Text("Buscar") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Cards de ejemplo
+                FleteCard(
+                    title = "Swift transport",
+                    pickUp = "8:00AM - 10:00AM",
+                    dropOff = "2:00PM - 4:00PM",
+                    navController = navController
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FleteCard(
+                    title = "Cargo connect",
+                    pickUp = "10:00AM - 12:00PM",
+                    dropOff = "2:00PM - 4:00PM",
+                    navController = navController
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { navController.navigate("users") },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF001B4E)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                ) {
+                    Text("Ver usuarios registrados", color = Color.White)
                 }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            //  Título con nombre dinámico
-            Text(
-                text = "Hola",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF001B4E)
-            )
-
-            Text(
-                text = "¿Qué flete te gustaría tomar?",
-                fontSize = 18.sp,
-                color = Color(0xFF001B4E)
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Buscador
-            OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                placeholder = { Text("Buscar") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Cards de ejemplo
-            FleteCard(
-                title = "Swift transport",
-                pickUp = "8:00AM - 10:00AM",
-                dropOff = "2:00PM - 4:00PM",
-                navController = navController
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            FleteCard(
-                title = "Cargo connect",
-                pickUp = "10:00AM - 12:00PM",
-                dropOff = "2:00PM - 4:00PM",
-                navController = navController
-            )
-            //  Botón para ver usuarios
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = { navController.navigate("users") },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF001B4E)),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-            ) {
-                Text("Ver usuarios registrados", color = Color.White)
-            }
-
         }
     }
 }
@@ -132,7 +141,7 @@ fun FleteCard(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            //  Título
+            // Título
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
@@ -140,7 +149,7 @@ fun FleteCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            //  Horarios
+            // Horarios
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -189,5 +198,3 @@ fun FleteCard(
         }
     }
 }
-
-

@@ -66,7 +66,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata")
     // Iconos adicionales de Material (incluye ArrowForwardIos)
 
-    //para las fotos y weas
+    //para las fotos
     // ---  CameraX ---
     implementation("androidx.camera:camera-camera2:1.2.2")
     implementation("androidx.camera:camera-lifecycle:1.2.2")

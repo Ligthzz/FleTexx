@@ -76,9 +76,6 @@ fun ProfileScreen(navController: NavController) {
                     contentDescription = "Logo Fletex",
                     modifier = Modifier.size(55.dp)
                 )
-                IconButton(onClick = { /* Menú lateral */ }) {
-                    Icon(Icons.Default.Menu, contentDescription = "Menú", tint = Color(0xFF001B4E))
-                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
