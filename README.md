@@ -8,7 +8,7 @@
 
 - **Joscelynne Joice Díaz Zavala**
 - **Joaquin Alonso Medina Villa**
-- **Valentina Ignacia Morales Figueroa**
+
     
   Ingeniería Informática — Duoc UC  
   Chile  
