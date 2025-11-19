@@ -10,8 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.delay
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
-    var isLoading = mutableStateOf(false)
 
+    var isLoading = mutableStateOf(false)
 
     private val repository = UserRepository(application.applicationContext)
 
@@ -20,12 +20,17 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     var password = mutableStateOf("")
     var errorMessage = mutableStateOf("")
 
-    //  Método para iniciar sesión con validaciones + Room
+    // 👉 NUEVO: para que el Drawer tenga siempre un nombre
+    fun getUserName(): String = fullName.value.ifBlank { "Conductor" }
+
     fun login(onSuccess: () -> Unit) {
         viewModelScope.launch {
             isLoading.value = true
+
             val user = repository.loginUser(email.value, password.value)
-            delay(600) // (opcional) para mostrar el spinner un instante
+
+            delay(600)
+
             if (user != null) {
                 fullName.value = user.fullName
                 errorMessage.value = ""
@@ -38,8 +43,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
-    //  Método de registro con validaciones campo a campo + guardado en Room
     fun register(
         fullName: String,
         phone: String,
@@ -53,12 +56,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             phone.isBlank() -> errorMessage.value = "El número de teléfono es obligatorio"
             !phone.matches(Regex("^\\+?\\d{8,15}\$")) -> errorMessage.value = "El teléfono no es válido"
             email.isBlank() -> errorMessage.value = "El correo electrónico es obligatorio"
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> errorMessage.value = "El formato del correo no es válido"
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                errorMessage.value = "El formato del correo no es válido"
             password.length < 6 -> errorMessage.value = "La contraseña debe tener al menos 6 caracteres"
             password != confirmPassword -> errorMessage.value = "Las contraseñas no coinciden"
 
             else -> {
-                //  Si pasa todas las validaciones, guarda en SQLite local
                 viewModelScope.launch {
                     val user = User(
                         fullName = fullName,

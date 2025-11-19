@@ -135,7 +135,10 @@ fun LoginScreen(navController: NavController) {
                                 scope.launch {
                                     snackbarHostState.showSnackbar("Bienvenido/a ${viewModel.fullName.value.ifBlank { "👋" }}")
                                     delay(1200)
-                                    navController.navigate("home")
+                                    viewModel.login {
+                                        navController.navigate("home")
+                                    }
+
                                 }
                             }
                         } else {
