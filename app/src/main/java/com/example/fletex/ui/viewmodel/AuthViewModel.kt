@@ -118,4 +118,29 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteUser(
+        id: Int,
+        passwordEntered: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            val current = repository.getAllUsers().lastOrNull()
+
+            if (current == null) {
+                onError("No se encontró el usuario")
+                return@launch
+            }
+
+            if (passwordEntered != current.password) {
+                onError("La contraseña no coincide")
+                return@launch
+            }
+
+            repository.deleteUser(id)
+            onSuccess()
+        }
+    }
+
+
 }

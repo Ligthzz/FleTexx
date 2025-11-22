@@ -30,6 +30,9 @@ class UserRepository(context: Context) {
         userDao.updateUser(user)
     }
 
+    //para eliminar usuario
+    suspend fun deleteUser(id: Int) = userDao.deleteUser(id)
+
 
 
 }

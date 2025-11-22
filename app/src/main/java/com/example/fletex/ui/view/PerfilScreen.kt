@@ -151,6 +151,17 @@ fun ProfileScreen(navController: NavController) {
             ) {
                 Text("Cerrar sesión", color = Color(0xFF001B4E))
             }
+            // eliminar la cuenta
+            TextButton(
+                onClick = {
+                    user?.let {
+                        navController.navigate("eliminarCuenta/${it.id}")
+                    }
+                }
+            ) {
+                Text("Eliminar cuenta", color = Color(0xFF001B4E))
+            }
+
         }
     }
 }
