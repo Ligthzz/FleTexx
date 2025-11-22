@@ -79,6 +79,9 @@ class MainActivity : ComponentActivity() {
                                 composable("rutaScreen") { RutaScreen(navController) }
                                 composable("users") { UserListScreen(navController) }
                                 composable("perfil") { ProfileScreen(navController) }
+                                composable("editarPerfil") {
+                                    EditarPerfilScreen(navController)
+                                }
 
                             }
 
