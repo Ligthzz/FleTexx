@@ -76,4 +76,46 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+
+    fun updateUser(
+        id: Int,
+        fullName: String,
+        phone: String,
+        email: String,
+        password: String,
+        confirmPassword: String,
+        onSuccess: () -> Unit
+    ) {
+        when {
+            fullName.isBlank() -> errorMessage.value = "El nombre no puede estar vacío"
+            phone.isBlank() -> errorMessage.value = "El teléfono es obligatorio"
+            !phone.matches(Regex("^\\+?\\d{8,15}\$")) ->
+                errorMessage.value = "Formato de teléfono no válido"
+            email.isBlank() -> errorMessage.value = "El correo no puede estar vacío"
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                errorMessage.value = "Formato de correo inválido"
+
+            // si el usuario escribe una nueva contraseña, debe confirmarla
+            password.isNotBlank() && password != confirmPassword ->
+                errorMessage.value = "Las contraseñas no coinciden"
+
+            else -> {
+                viewModelScope.launch {
+                    val newPassword = if (password.isBlank()) this@AuthViewModel.password.value else password
+                    val user = User(
+                        id = id,
+                        fullName = fullName,
+                        phone = phone,
+                        email = email,
+                        password = newPassword
+                    )
+                    repository.updateUser(user)
+                    errorMessage.value = ""
+                    onSuccess()
+                }
+            }
+        }
+    }
+
 }

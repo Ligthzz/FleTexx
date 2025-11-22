@@ -21,8 +21,15 @@ class UserRepository(context: Context) {
 
     suspend fun getAllUsers(): List<User> = userDao.getAllUsers()
 
-    //  Nuevo método para cargar el perfil según el correo
+    //  metodo para cargar el perfil según el correo
     suspend fun getUserByEmail(email: String): User? {
         return userDao.getUserByEmail(email)
     }
+    //para hacer la actualizacion
+    suspend fun updateUser(user: User) {
+        userDao.updateUser(user)
+    }
+
+
+
 }

@@ -124,7 +124,7 @@ fun ProfileScreen(navController: NavController) {
 
             // Botón editar perfil
             Button(
-                onClick = { /* Próxima función */ },
+                onClick = { navController.navigate("editarPerfil") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933)),
                 modifier = Modifier
                     .fillMaxWidth()
