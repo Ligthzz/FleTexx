@@ -34,7 +34,8 @@ fun MainScreen(
                 onPerfilClick = { navController.navigate("perfil") },
                 onMapaClick = { navController.navigate("mapa") },
                 onChatClick = { navController.navigate("chat") },
-                onAjustesClick = { navController.navigate("ajustes") }
+                onAjustesClick = { navController.navigate("ajustes") },
+                onTrabajaClick = { navController.navigate("trabajaFletex") }
             )
         }
     ) {

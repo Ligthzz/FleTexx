@@ -83,6 +83,7 @@ class MainActivity : ComponentActivity() {
                                 composable("eliminarCuenta/{id}") { backStackEntry ->
                                     val userId = backStackEntry.arguments?.getString("id")?.toInt() ?: 0
                                     EliminarCuentaScreen(navController, userId) }
+                                composable("trabajaFletex") { (navController) }
 
 
                             }

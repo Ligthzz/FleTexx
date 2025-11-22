@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,7 +22,8 @@ fun FletexDrawer(
     onPerfilClick: () -> Unit,
     onMapaClick: () -> Unit,
     onChatClick: () -> Unit,
-    onAjustesClick: () -> Unit
+    onAjustesClick: () -> Unit,
+    onTrabajaClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -48,7 +50,7 @@ fun FletexDrawer(
         )
 
         Text(
-            text = "San Francisco",
+            text = "San Francisco", //CAMBIAR
             fontSize = 14.sp,
             color = Color.DarkGray,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -61,6 +63,10 @@ fun FletexDrawer(
         DrawerItem("Mapa", R.drawable.mapa, onMapaClick)
         DrawerItem("Chat", R.drawable.chat, onChatClick)
         DrawerItem("Ajustes", R.drawable.setting, onAjustesClick)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        DrawerItem("Trabaja con FleteX", R.drawable.ic_fletex, onTrabajaClick)
     }
 }
 

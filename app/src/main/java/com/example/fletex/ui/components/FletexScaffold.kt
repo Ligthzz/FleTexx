@@ -29,7 +29,9 @@ fun FletexScaffold(
                 onPerfilClick = { navController.navigate("perfil") },
                 onMapaClick = { navController.navigate("home") },
                 onChatClick = { navController.navigate("chat") },
-                onAjustesClick = { navController.navigate("perfil") }
+                onAjustesClick = { navController.navigate("ajustes") }, // agregar cuando exista configuracion
+                onTrabajaClick = { navController.navigate("trabajaFletex") }
+
             )
         }
     ) {
