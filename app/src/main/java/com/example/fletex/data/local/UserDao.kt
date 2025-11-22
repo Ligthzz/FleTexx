@@ -25,8 +25,11 @@ interface UserDao {
     @Update
     suspend fun updateUser(user: User)
 
-    @Delete
-    suspend fun deleteUser(user: User)
+//    @Delete
+//    suspend fun deleteUser(user: User)
+    // eliminar usuario con el parametro de id
+    @Query("DELETE FROM users WHERE id = :id")
+    suspend fun deleteUser(id: Int)
 
 
 

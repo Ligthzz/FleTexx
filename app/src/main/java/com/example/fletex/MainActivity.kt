@@ -79,9 +79,11 @@ class MainActivity : ComponentActivity() {
                                 composable("rutaScreen") { RutaScreen(navController) }
                                 composable("users") { UserListScreen(navController) }
                                 composable("perfil") { ProfileScreen(navController) }
-                                composable("editarPerfil") {
-                                    EditarPerfilScreen(navController)
-                                }
+                                composable("editarPerfil") { EditarPerfilScreen(navController) }
+                                composable("eliminarCuenta/{id}") { backStackEntry ->
+                                    val userId = backStackEntry.arguments?.getString("id")?.toInt() ?: 0
+                                    EliminarCuentaScreen(navController, userId) }
+
 
                             }
 
