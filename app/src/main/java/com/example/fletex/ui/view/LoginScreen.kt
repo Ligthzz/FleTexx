@@ -1,6 +1,5 @@
 package com.example.fletex.ui.view
 
-import android.app.Application
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -12,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -20,39 +18,31 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.example.fletex.R
 import com.example.fletex.ui.viewmodel.AuthViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController) {
-    val context = LocalContext.current
-
-    // ViewModel con Application para Room
-    val viewModel: AuthViewModel = viewModel(
-        factory = viewModelFactory {
-            initializer { AuthViewModel(context.applicationContext as Application) }
-        }
-    )
+fun LoginScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel   // ← VIENE DESDE MAINACTIVITY
+) {
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
+
         Surface(
             color = Color(0xFFE6F4FA),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
+
             Column(
                 modifier = Modifier
                     .padding(24.dp)
@@ -60,7 +50,7 @@ fun LoginScreen(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Logo
+
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo Fletex",
@@ -68,6 +58,7 @@ fun LoginScreen(navController: NavController) {
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
+
                 Text(
                     text = "Iniciar Sesión",
                     fontWeight = FontWeight.Bold,
@@ -77,11 +68,11 @@ fun LoginScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                //  Email
+                // EMAIL
                 OutlinedTextField(
-                    value = viewModel.email.value,
+                    value = authViewModel.email.value,
                     onValueChange = {
-                        viewModel.email.value = it
+                        authViewModel.email.value = it
                         emailError = !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
                     },
                     isError = emailError,
@@ -89,20 +80,21 @@ fun LoginScreen(navController: NavController) {
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     trailingIcon = {
-                        if (emailError) Icon(Icons.Default.Error, contentDescription = "Error", tint = Color.Red)
+                        if (emailError) Icon(Icons.Default.Error, contentDescription = null, tint = Color.Red)
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 if (emailError)
-                    Text("Formato de correo inválido", color = Color.Red, fontSize = 12.sp)
+                    Text("Correo inválido", color = Color.Red, fontSize = 12.sp)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                //  Contraseña
+                // PASSWORD
                 OutlinedTextField(
-                    value = viewModel.password.value,
+                    value = authViewModel.password.value,
                     onValueChange = {
-                        viewModel.password.value = it
+                        authViewModel.password.value = it
                         passwordError = it.length < 6
                     },
                     isError = passwordError,
@@ -111,48 +103,47 @@ fun LoginScreen(navController: NavController) {
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
-                        if (passwordError) Icon(Icons.Default.Error, contentDescription = "Error", tint = Color.Red)
+                        if (passwordError) Icon(Icons.Default.Error, contentDescription = null, tint = Color.Red)
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 if (passwordError)
-                    Text("Debe tener al menos 6 caracteres", color = Color.Red, fontSize = 12.sp)
+                    Text("Mínimo 6 caracteres", color = Color.Red, fontSize = 12.sp)
 
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("¿Olvidaste la contraseña?", color = Color(0xFFFF9933), fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(25.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                //  Botón de inicio de sesión
-                //  Estado de carga
-                var isLoading by remember { mutableStateOf(false) }
-
-//  Botón con animación y loader
+                // BOTÓN LOGIN
                 Button(
                     onClick = {
                         if (!emailError && !passwordError) {
-                            viewModel.login {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar("Bienvenido/a ${viewModel.fullName.value.ifBlank { "👋" }}")
-                                    delay(1200)
-                                    viewModel.login {
-                                        navController.navigate("home")
-                                    }
 
+                            authViewModel.login {
+
+                                //  DESPUÉS DE LOGEAR → VERIFICA ROL
+                                if (authViewModel.role.value == "conductor") {
+                                    navController.navigate("homeFletero") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate("home") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
                             }
+
                         } else {
-                            viewModel.errorMessage.value =
-                                "Por favor corrige los campos antes de continuar"
+                            authViewModel.errorMessage.value =
+                                "Corrige los campos antes de continuar"
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(55.dp) // fija el alto del botón para evitar recortes
-                        .animateContentSize(), // suaviza la transición texto ↔ loader
+                        .height(55.dp)
+                        .animateContentSize(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933))
                 ) {
-                    if (viewModel.isLoading.value) {
+                    if (authViewModel.isLoading.value) {
                         CircularProgressIndicator(
                             color = Color.White,
                             modifier = Modifier.size(24.dp),
@@ -164,34 +155,28 @@ fun LoginScreen(navController: NavController) {
                 }
 
 
-
-                //  Mensaje general de error
-                if (viewModel.errorMessage.value.isNotEmpty()) {
+                // ERROR GENERAL
+                if (authViewModel.errorMessage.value.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        viewModel.errorMessage.value,
+                        authViewModel.errorMessage.value,
                         color = Color.Red,
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
 
-                //  Ir al registro
                 Spacer(modifier = Modifier.height(20.dp))
+
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "¿No tienes cuenta?",
-                        color = Color(0xFF001B4E),
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
+                    Text("¿No tienes cuenta?", color = Color(0xFF001B4E))
                     TextButton(onClick = { navController.navigate("register") }) {
                         Text(
-                            text = "Regístrate aquí",
+                            "Regístrate aquí",
                             color = Color(0xFFFF9800),
-                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }

@@ -1,37 +1,33 @@
 package com.example.fletex.ui.view
 
-import android.app.Application
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.example.fletex.ui.viewmodel.AuthViewModel
 
 @Composable
-fun EliminarCuentaScreen(navController: NavController, userId: Int) {
+fun EliminarCuentaScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel   // ⬅️ ESTE VIENE DEL MAIN (EL CORRECTO)
+) {
 
-    val context = LocalContext.current
+    val userId = authViewModel.userId.value
 
-    val viewModel: AuthViewModel = viewModel(
-        factory = viewModelFactory {
-            initializer { AuthViewModel(context.applicationContext as Application) }
+    if (userId == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
-    )
+        return
+    }
 
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -65,7 +61,11 @@ fun EliminarCuentaScreen(navController: NavController, userId: Int) {
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // CANCELAR
                 Button(
                     onClick = { navController.popBackStack() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA856)),
@@ -76,14 +76,15 @@ fun EliminarCuentaScreen(navController: NavController, userId: Int) {
 
                 Spacer(modifier = Modifier.width(12.dp))
 
+                // CONFIRMAR
                 Button(
                     onClick = {
-                        viewModel.deleteUser(
+                        authViewModel.deleteUser(
                             id = userId,
                             passwordEntered = password,
                             onSuccess = {
                                 navController.navigate("login") {
-                                    popUpTo("home") { inclusive = true }
+                                    popUpTo("welcome") { inclusive = true }
                                 }
                             },
                             onError = { msg -> error = msg }

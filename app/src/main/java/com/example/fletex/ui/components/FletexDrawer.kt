@@ -18,12 +18,13 @@ import com.example.fletex.R
 @Composable
 fun FletexDrawer(
     userName: String,
+    role: String,
     onRutasClick: () -> Unit,
     onPerfilClick: () -> Unit,
     onMapaClick: () -> Unit,
     onChatClick: () -> Unit,
     onAjustesClick: () -> Unit,
-    onTrabajaClick: () -> Unit
+    onTrabajaConFletex: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -66,7 +67,12 @@ fun FletexDrawer(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        DrawerItem("Trabaja con FleteX", R.drawable.ic_fletex, onTrabajaClick)
+        if (role == "usuario") {
+            DrawerItem("Trabaja con Fletex", R.drawable.ic_fletex, onTrabajaConFletex)
+        } else {
+            // Opciones “de conductor”, si quieres diferenciarlas
+            DrawerItem("Mis fletes", R.drawable.ic_fletex, onRutasClick)
+        }
     }
 }
 
