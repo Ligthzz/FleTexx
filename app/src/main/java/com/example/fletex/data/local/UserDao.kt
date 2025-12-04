@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.fletex.data.model.User
+import com.example.fletex.data.model.Vehicle
 
 @Dao
 interface UserDao {
@@ -31,9 +32,15 @@ interface UserDao {
     @Query("DELETE FROM users WHERE id = :id")
     suspend fun deleteUser(id: Int)
 
-
-
-
+//SIRVE PARA EL MOMENTO DE CAMBIAR A CONDUCTOR
+    @Query("UPDATE users SET role = :role WHERE id = :userId")
+    suspend fun updateUserRole(userId: Int, role: String)
+//obtener usuario por id
+    @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
+    suspend fun getUserById(id: Int): User?
 
 
 }
+
+
+

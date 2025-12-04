@@ -1,5 +1,6 @@
 package com.example.fletex.ui.view
 
+import android.app.Application
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -19,6 +21,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.example.fletex.R
 import com.example.fletex.ui.viewmodel.AuthViewModel
@@ -27,7 +31,8 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
+fun RegisterScreen(navController: NavController, viewModel: AuthViewModel) {
+
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -43,7 +48,6 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
     var passwordError by remember { mutableStateOf(false) }
     var confirmError by remember { mutableStateOf(false) }
 
-    //  Estado para animación del botón
     var isRegistering by remember { mutableStateOf(false) }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
@@ -53,6 +57,7 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
                 .fillMaxSize()
                 .padding(padding)
         ) {
+
             Column(
                 modifier = Modifier
                     .padding(24.dp)
@@ -60,16 +65,17 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Logo
+
                 Image(
                     painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo Fletex",
+                    contentDescription = "Logo",
                     modifier = Modifier.size(100.dp)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+
                 Text(
-                    text = "Registrarme",
+                    "Registrarme",
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp,
                     color = Color(0xFF001B4E)
@@ -77,7 +83,6 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // ️ Campos de texto
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = {
@@ -86,13 +91,10 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
                     },
                     isError = nameError,
                     label = { Text("Nombre completo") },
-                    trailingIcon = {
-                        if (nameError) Icon(Icons.Default.Error, contentDescription = "Error", tint = Color.Red)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                if (nameError) Text("El nombre es obligatorio", color = Color.Red, fontSize = 12.sp)
+                if (nameError) Text("Campo obligatorio", color = Color.Red, fontSize = 12.sp)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -100,18 +102,15 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
                     value = phone,
                     onValueChange = {
                         phone = it
-                        phoneError = !it.matches(Regex("^\\+?\\d{8,15}\$"))
+                        phoneError = !it.matches(Regex("^\\+?\\d{8,15}$"))
                     },
                     isError = phoneError,
                     label = { Text("Teléfono") },
-                    trailingIcon = {
-                        if (phoneError) Icon(Icons.Default.Error, contentDescription = "Error", tint = Color.Red)
-                    },
+                    singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    modifier = Modifier.fillMaxWidth()
                 )
-                if (phoneError) Text("Número no válido", color = Color.Red, fontSize = 12.sp)
+                if (phoneError) Text("Número inválido", color = Color.Red)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -123,14 +122,11 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
                     },
                     isError = emailError,
                     label = { Text("Correo electrónico") },
-                    trailingIcon = {
-                        if (emailError) Icon(Icons.Default.Error, contentDescription = "Error", tint = Color.Red)
-                    },
+                    singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    modifier = Modifier.fillMaxWidth()
                 )
-                if (emailError) Text("Formato de correo inválido", color = Color.Red, fontSize = 12.sp)
+                if (emailError) Text("Email inválido", color = Color.Red)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -142,14 +138,11 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
                     },
                     isError = passwordError,
                     label = { Text("Contraseña") },
-                    trailingIcon = {
-                        if (passwordError) Icon(Icons.Default.Error, contentDescription = "Error", tint = Color.Red)
-                    },
                     visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                if (passwordError) Text("Debe tener al menos 6 caracteres", color = Color.Red, fontSize = 12.sp)
+                if (passwordError) Text("Debe tener mínimo 6 caracteres", color = Color.Red)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -161,46 +154,48 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
                     },
                     isError = confirmError,
                     label = { Text("Confirmar contraseña") },
-                    trailingIcon = {
-                        if (confirmError) Icon(Icons.Default.Error, contentDescription = "Error", tint = Color.Red)
-                    },
                     visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                if (confirmError) Text("Las contraseñas no coinciden", color = Color.Red, fontSize = 12.sp)
+                if (confirmError) Text("Las contraseñas no coinciden", color = Color.Red)
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                //  Botón animado con loader
                 Button(
                     onClick = {
                         if (!nameError && !phoneError && !emailError && !passwordError && !confirmError) {
+
                             isRegistering = true
-                            viewModel.register(fullName, phone, email, password, confirmPassword) {
+
+                            viewModel.register(
+                                fullName,
+                                phone,
+                                email,
+                                password,
+                                confirmPassword
+                            ) {
                                 scope.launch {
-                                    delay(1500)
+                                    delay(1200)
                                     snackbarHostState.showSnackbar("Registro exitoso 🎉")
                                     isRegistering = false
                                     navController.navigate("login")
                                 }
                             }
+
                         } else {
-                            viewModel.errorMessage.value =
-                                "Corrige los campos marcados antes de continuar"
+                            viewModel.errorMessage.value = "Corrige los campos marcados"
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .animateContentSize(), //  transición suave
+                        .animateContentSize(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933))
                 ) {
                     if (isRegistering) {
                         CircularProgressIndicator(
                             color = Color.White,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .padding(4.dp),
+                            modifier = Modifier.size(24.dp),
                             strokeWidth = 2.dp
                         )
                     } else {
@@ -208,35 +203,21 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
                     }
                 }
 
-                //  Mensaje general
                 if (viewModel.errorMessage.value.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(viewModel.errorMessage.value, color = Color.Red, fontSize = 14.sp)
+                    Spacer(Modifier.height(12.dp))
+                    Text(viewModel.errorMessage.value, color = Color.Red)
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                //  Enlace para ir al login
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "¿Ya tienes una cuenta?",
-                        color = Color(0xFF001B4E),
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
+                Row {
+                    Text("¿Ya tienes cuenta?", color = Color(0xFF001B4E))
                     TextButton(onClick = { navController.navigate("login") }) {
-                        Text(
-                            text = "Inicia sesión",
-                            color = Color(0xFFFF9933),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text("Inicia sesión", color = Color(0xFFFF9933))
                     }
                 }
             }
         }
     }
 }
+

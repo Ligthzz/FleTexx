@@ -13,27 +13,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fletex.data.local.UserRepository
-import com.example.fletex.data.model.User
+import com.example.fletex.data.model.Vehicle
 import kotlinx.coroutines.launch
 
 @Composable
-fun UserListScreen(navController: NavController) {
+fun VerTodosLosAutomovilesScreen(navController: NavController) {
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val repository = remember { UserRepository(context) }
+    val scope = rememberCoroutineScope()
 
-    var users by remember { mutableStateOf(listOf<User>()) }
+    var vehicles by remember { mutableStateOf(listOf<Vehicle>()) }
 
-    //  Cargar usuarios al iniciar
+    // Cargar todos los vehículos
     LaunchedEffect(Unit) {
         scope.launch {
-            users = repository.getAllUsers()
+            vehicles = repository.getAllVehicles()
         }
     }
 
@@ -41,13 +42,14 @@ fun UserListScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFE6F4FA)
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
 
-            //  Header con botón de volver
+            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -58,7 +60,7 @@ fun UserListScreen(navController: NavController) {
                 }
 
                 Text(
-                    text = "Usuarios Registrados",
+                    text = "Todos los Automóviles",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF001B4E)
@@ -67,19 +69,17 @@ fun UserListScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (users.isEmpty()) {
+            if (vehicles.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No hay usuarios registrados aún", color = Color.Gray)
+                    Text("Aún no hay vehículos registrados", color = Color.Gray)
                 }
             } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(users) { user ->
-                        UserCard(user)
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(vehicles) { vehicle ->
+                        VehicleCard(vehicle)
                     }
                 }
             }
@@ -88,7 +88,8 @@ fun UserListScreen(navController: NavController) {
 }
 
 @Composable
-fun UserCard(user: User) {
+fun VehicleCard(vehicle: Vehicle) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,13 +98,17 @@ fun UserCard(user: User) {
             .padding(16.dp)
     ) {
         Text(
-            text = user.fullName,
+            text = "Patente: ${vehicle.patente}",
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF001B4E),
-            fontSize = 18.sp
+            fontSize = 18.sp,
+            color = Color(0xFF001B4E)
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = " ${user.email}", color = Color(0xFF333333))
-        Text(text = " ${user.phone}", color = Color(0xFF555555))
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text("Tipo: ${vehicle.tipo}", color = Color(0xFF333333))
+        Text("Tamaño: ${vehicle.tamano}", color = Color(0xFF333333))
+        Text("Capacidad: ${vehicle.capacidad}", color = Color(0xFF333333))
+        Text("Dueño (ID usuario): ${vehicle.userId}", color = Color.Gray, fontSize = 12.sp)
     }
 }

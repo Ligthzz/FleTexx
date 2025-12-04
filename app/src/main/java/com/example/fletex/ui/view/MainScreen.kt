@@ -30,12 +30,13 @@ fun MainScreen(
         drawerContent = {
             FletexDrawer(
                 userName = userName,
+                role = authViewModel.role.value,
                 onRutasClick = { navController.navigate("rutas") },
                 onPerfilClick = { navController.navigate("perfil") },
                 onMapaClick = { navController.navigate("mapa") },
                 onChatClick = { navController.navigate("chat") },
-                onAjustesClick = { navController.navigate("ajustes") },
-                onTrabajaClick = { navController.navigate("trabajaFletex") }
+                onAjustesClick = { navController.navigate(" ") },
+                onTrabajaConFletex = { navController.navigate("registrarFlete") }
             )
         }
     ) {
