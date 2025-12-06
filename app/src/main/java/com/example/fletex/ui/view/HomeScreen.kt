@@ -2,9 +2,9 @@ package com.example.fletex.ui.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,6 +40,8 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
+                    .verticalScroll(rememberScrollState()), // ⭐ SCROLL AÑADIDO ⭐
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
                 // Header
@@ -53,9 +55,6 @@ fun HomeScreen(
                         contentDescription = "Logo Fletex",
                         modifier = Modifier.size(60.dp)
                     )
-
-
-
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -106,6 +105,20 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // BOTÓN CLIMA
+                Button(
+                    onClick = { navController.navigate("clima") },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                ) {
+                    Text("Ver clima actual", color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // BOTÓN USUARIOS
                 Button(
                     onClick = { navController.navigate("users") },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF001B4E)),
@@ -115,6 +128,8 @@ fun HomeScreen(
                 ) {
                     Text("Ver usuarios registrados", color = Color.White)
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }

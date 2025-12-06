@@ -135,6 +135,9 @@ class MainActivity : ComponentActivity() {
                                 composable("profileFletero") {
                                     ProfileFleteroScreen(navController, authViewModel)
                                 }
+                                composable("clima") {
+                                    WeatherScreen(navController)
+                                }
 
 
 
