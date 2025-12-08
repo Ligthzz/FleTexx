@@ -27,7 +27,6 @@ fun HomeFleteroScreen(
 
     val userName = authViewModel.fullName.value.ifBlank { "Conductor" }
 
-    //  Usa el mismo scaffold del Home normal
     FletexScaffold(
         navController = navController,
         userName = userName
@@ -54,11 +53,11 @@ fun HomeFleteroScreen(
 
                     Image(
                         painter = painterResource(id = R.drawable.logo),
-                        contentDescription = "Logo Fletex",
+                        contentDescription = "Logo FleteX",
                         modifier = Modifier.size(60.dp)
                     )
 
-                    IconButton(onClick = { /* abrir menú */ }) {
+                    IconButton(onClick = { /* menú futuro */ }) {
                         Icon(
                             Icons.Default.Menu,
                             contentDescription = "Menu",
@@ -80,14 +79,13 @@ fun HomeFleteroScreen(
                 Spacer(modifier = Modifier.height(35.dp))
 
 
-                // ------------ BOTONES NORMALES DE M3 ------------
-
+                // ------------ BOTÓN CREAR RUTA ------------
                 Button(
                     onClick = { navController.navigate("crearRuta") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary
                     )
@@ -97,12 +95,14 @@ fun HomeFleteroScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+
+                // ------------ BOTÓN VER FLETES ------------
                 Button(
                     onClick = { navController.navigate("verFletes") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary
                     )
@@ -112,12 +112,14 @@ fun HomeFleteroScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+
+                // ------------ BOTÓN EDITAR AUTOMÓVIL ------------
                 Button(
                     onClick = { navController.navigate("editarAutomovil") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary
                     )
@@ -127,12 +129,31 @@ fun HomeFleteroScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+
+                // ------------ BOTÓN MIS VEHÍCULOS ------------
+                Button(
+                    onClick = { navController.navigate("misVehiculos") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Text("Mis vehículos", color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+
+                //  ------------ BOTÓN NUEVO: VER TODOS LOS VEHÍCULOS ------------
                 Button(
                     onClick = { navController.navigate("todosAutomoviles") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(55.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary
                     )
@@ -141,6 +162,5 @@ fun HomeFleteroScreen(
                 }
             }
         }
-        //AGREGAR PARTE DE ABAJOOOOOOOOOOOO
     }
 }

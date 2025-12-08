@@ -27,7 +27,6 @@ fun EditarVehiculoScreen(
 ) {
     val userId = authViewModel.remoteUserId.value
     val scope = rememberCoroutineScope()
-
     val snack = remember { SnackbarHostState() }
 
     if (userId.isBlank()) {
@@ -59,6 +58,8 @@ fun EditarVehiculoScreen(
                     patente = v.patente
                     tamano = v.tamano
                     capacidad = v.capacidad
+                } else {
+                    scope.launch { snack.showSnackbar("No se encontró vehículo") }
                 }
             },
             onError = { msg ->
@@ -68,6 +69,7 @@ fun EditarVehiculoScreen(
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snack) }) { padding ->
+
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -143,7 +145,7 @@ fun EditarVehiculoScreen(
 
             Spacer(Modifier.height(30.dp))
 
-            // ---------- GUARDAR ----------
+            // ---------- BOTÓN GUARDAR ----------
             Button(
                 onClick = {
                     if (tipoError || patenteError || tamanoError || capacidadError ||
@@ -173,15 +175,11 @@ fun EditarVehiculoScreen(
                             vehicle = body,
                             onSuccess = {
                                 scope.launch {
-                                    snack.showSnackbar("vehiculo actualizado con exito")
+                                    snack.showSnackbar("Vehículo actualizado con éxito")
                                 }
-
                             },
                             onError = { msg ->
-                                scope.launch {
-                                    snack.showSnackbar("msg")
-                                }
-
+                                scope.launch { snack.showSnackbar(msg) }
                             }
                         )
                     }
@@ -194,7 +192,7 @@ fun EditarVehiculoScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // ---------- ELIMINAR VEHÍCULO ----------
+            // ---------- BOTÓN ELIMINAR ----------
             Button(
                 onClick = {
                     val id = vehiculoId
@@ -204,19 +202,30 @@ fun EditarVehiculoScreen(
                     }
 
                     scope.launch {
+
                         authViewModel.deleteVehicleRemote(
                             vehicleId = id,
                             onSuccess = {
-                                authViewModel.downgradeRoleIfNoVehicles()
-                                scope.launch {
-                                    snack.showSnackbar("vehiculo eliminado")
-                                }
 
-                                navController.popBackStack()
+                                // 1) Calcular nuevo rol
+                                authViewModel.downgradeRoleIfNoVehicles()
+
+                                // 2) Avisar
+                                scope.launch { snack.showSnackbar("Vehículo eliminado") }
+
+                                // 3) Navegar según rol actual
+                                if (authViewModel.role.value == "usuario") {
+                                    navController.navigate("home") {
+                                        popUpTo("homeFletero") { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate("homeFletero") {
+                                        popUpTo("homeFletero") { inclusive = true }
+                                    }
+                                }
                             },
-                            onError = { msg ->scope.launch {
-                                snack.showSnackbar(msg)
-                            }
+                            onError = { msg ->
+                                scope.launch { snack.showSnackbar(msg) }
                             }
                         )
                     }

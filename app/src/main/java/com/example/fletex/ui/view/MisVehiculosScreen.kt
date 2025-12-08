@@ -27,7 +27,7 @@ fun MisVehiculosScreen(
     var vehicles by remember { mutableStateOf<List<VehicleRemote>>(emptyList()) }
     var errorMessage by remember { mutableStateOf("") }
 
-    // Cargar vehículos remotos
+    // ---------- Cargar vehículos remotos ----------
     LaunchedEffect(Unit) {
         authViewModel.getMyVehiclesRemote(
             onResult = { list ->

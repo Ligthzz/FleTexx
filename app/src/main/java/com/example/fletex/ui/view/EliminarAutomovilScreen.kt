@@ -29,133 +29,147 @@ fun EliminarAutomovilScreen(
     authViewModel: AuthViewModel
 ) {
 
-    val mongoId = authViewModel.remoteUserId.value
-    val userEmail = authViewModel.email.value
     val scope = rememberCoroutineScope()
+    val snack = remember { SnackbarHostState() }
 
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFE6F4FA)
-    ) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snack) }
+    ) { padding ->
 
-        Column(
+        Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(padding),
+            color = Color(0xFFE6F4FA)
         ) {
 
-            // HEADER
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+
+                // HEADER
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    }
+
+                    Text(
+                        "Eliminar vehículo",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF001B4E),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // AVATAR
+                Image(
+                    painter = painterResource(id = R.drawable.avatar_ejemplo),
+                    contentDescription = "Foto",
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFEFDFF5))
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
 
                 Text(
-                    "Eliminar vehículo",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = "¿Seguro que quieres eliminar\ntu vehículo vinculado?",
+                    fontSize = 20.sp,
                     color = Color(0xFF001B4E),
-                    modifier = Modifier.padding(start = 8.dp)
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
-            }
 
-            Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-            // AVATAR
-            Image(
-                painter = painterResource(id = R.drawable.avatar_ejemplo),
-                contentDescription = "Foto",
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFEFDFF5))
-            )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    singleLine = true,
+                    label = { Text("Ingresa tu contraseña") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Text(
-                text = "¿Estás seguro que quieres eliminar\ntu vehículo vinculado?",
-                fontSize = 20.sp,
-                color = Color(0xFF001B4E),
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                singleLine = true,
-                label = { Text("Ingresa tu contraseña") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (errorMessage.isNotEmpty()) {
-                Text(errorMessage, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "Tu cuenta volverá a modo usuario estándar",
-                fontSize = 13.sp,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-
-                // CANCELAR
-                Button(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                ) {
-                    Text("Cancelar")
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        errorMessage,
+                        color = Color.Red,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // CONFIRMAR
-                Button(
-                    onClick = {
-                        if (password.isBlank()) {
-                            errorMessage = "Ingresa tu contraseña"
-                            return@Button
-                        }
+                Text(
+                    text = "Tu cuenta volverá a usuario estándar si no quedan vehículos.",
+                    fontSize = 13.sp,
+                    color = Color.Gray
+                )
 
-                        // Validar la contraseña usando loginRemote
-                        scope.launch {
-                            authViewModel.removeAllVehiclesAndDowngrade(
-                                onSuccess = {
-                                    navController.navigate("home") {
-                                        popUpTo("homeFletero") { inclusive = true }
-                                    }
-                                },
-                                onError = { msg -> errorMessage = msg }
-                            )
-                        }
+                Spacer(modifier = Modifier.height(30.dp))
 
-                    },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Confirmar", color = Color.White)
+
+                    // CANCELAR
+                    Button(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Cancelar")
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    // CONFIRMAR
+                    Button(
+                        onClick = {
+                            if (password.isBlank()) {
+                                errorMessage = "Ingresa tu contraseña"
+                                return@Button
+                            }
+
+                            scope.launch {
+                                authViewModel.removeAllVehiclesAndDowngrade(
+                                    onSuccess = {
+                                        // LÓGICA CORRECTA DE REDIRECCIÓN
+                                        if (authViewModel.role.value == "usuario") {
+                                            navController.navigate("home") {
+                                                popUpTo("homeFletero") { inclusive = true }
+                                            }
+                                        } else {
+                                            navController.navigate("homeFletero") {
+                                                popUpTo("homeFletero") { inclusive = true }
+                                            }
+                                        }
+                                    },
+                                    onError = { msg -> errorMessage = msg }
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933))
+                    ) {
+                        Text("Confirmar", color = Color.White)
+                    }
                 }
             }
         }
     }
 }
-
