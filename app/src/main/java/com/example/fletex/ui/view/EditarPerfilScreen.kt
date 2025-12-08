@@ -23,28 +23,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditarPerfilScreen(
     navController: NavController,
-    authViewModel: AuthViewModel   // ⬅ SE RECIBE EL VIEWMODEL GLOBAL
+    authViewModel: AuthViewModel
 ) {
+    val mongoId = authViewModel.remoteUserId.value
 
-    // DATOS DEL USUARIO LOGEADO DESDE EL VIEWMODEL GLOBAL
-    val userId = authViewModel.userId.value
-    val currentName = authViewModel.fullName.value
-    val currentEmail = authViewModel.email.value
-    val currentPhone = authViewModel.phone.value ?: ""
-
-    if (userId == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) { CircularProgressIndicator() }
-        return
-    }
-
-    // ESTADOS LOCALES
-    var fullName by remember { mutableStateOf(currentName) }
-    var email by remember { mutableStateOf(currentEmail) }
-    var phone by remember { mutableStateOf(currentPhone) }
-
+    var fullName by remember { mutableStateOf(authViewModel.fullName.value) }
+    var email by remember { mutableStateOf(authViewModel.email.value) }
+    var phone by remember { mutableStateOf(authViewModel.phone.value ?: "") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
@@ -63,73 +48,57 @@ fun EditarPerfilScreen(
                 .padding(20.dp)
         ) {
 
-            // ---------- HEADER ----------
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                 }
-
-                Text(
-                    text = "Editar información principal",
-                    fontSize = 22.sp,
-                    color = Color(0xFF001B4E),
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+                Text("Editar Perfil", fontSize = 22.sp, color = Color(0xFF001B4E))
             }
 
             Spacer(Modifier.height(20.dp))
 
-            // ---------- NOMBRE ----------
             OutlinedTextField(
                 value = fullName,
                 onValueChange = {
                     fullName = it
                     nameError = it.isBlank()
                 },
+                label = { Text("Nombre completo") },
                 isError = nameError,
-                label = { Text("Nombre nuevo del usuario") },
                 modifier = Modifier.fillMaxWidth()
             )
-            if (nameError) Text("El nombre no puede estar vacío", color = Color.Red)
+            if (nameError) Text("El nombre es obligatorio", color = Color.Red)
 
             Spacer(Modifier.height(16.dp))
 
-            // ---------- EMAIL ----------
             OutlinedTextField(
                 value = email,
                 onValueChange = {
                     email = it
                     emailError = !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
                 },
+                label = { Text("Correo electrónico") },
                 isError = emailError,
-                label = { Text("Nueva dirección de correo") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth()
             )
             if (emailError) Text("Correo inválido", color = Color.Red)
 
             Spacer(Modifier.height(16.dp))
 
-            // ---------- TELÉFONO ----------
             OutlinedTextField(
                 value = phone,
                 onValueChange = {
                     phone = it
                     phoneError = !it.matches(Regex("^\\+?\\d{8,15}$"))
                 },
+                label = { Text("Teléfono") },
                 isError = phoneError,
-                label = { Text("Número telefónico nuevo") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier.fillMaxWidth()
             )
-            if (phoneError) Text("Número no válido", color = Color.Red)
+            if (phoneError) Text("Teléfono inválido", color = Color.Red)
 
             Spacer(Modifier.height(16.dp))
 
-            // ---------- CONTRASEÑA ----------
             OutlinedTextField(
                 value = newPassword,
                 onValueChange = { newPassword = it },
@@ -138,66 +107,54 @@ fun EditarPerfilScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(Modifier.height(16.dp))
-
             if (newPassword.isNotBlank()) {
+                Spacer(Modifier.height(16.dp))
+
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = {
                         confirmPassword = it
                         confirmError = it != newPassword
                     },
-                    isError = confirmError,
                     label = { Text("Confirmar contraseña") },
+                    isError = confirmError,
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth()
                 )
                 if (confirmError) Text("Las contraseñas no coinciden", color = Color.Red)
             }
 
-            Spacer(Modifier.height(30.dp))
+            Spacer(Modifier.height(40.dp))
 
-            // ---------- BOTONES ----------
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-
-                Button(
-                    onClick = { navController.popBackStack() },
-                    colors = ButtonDefaults.buttonColors(Color.Gray),
-                    modifier = Modifier.weight(1f)
-                ) { Text("Anular cambios") }
-
-                Spacer(Modifier.width(12.dp))
-
-                Button(
-                    onClick = {
-                        scope.launch {
-                            authViewModel.updateUser(
-                                id = userId,
-                                fullName = fullName,
-                                phone = phone,
-                                email = email,
-                                password = newPassword,
-                                confirmPassword = confirmPassword
-                            ) {
+            Button(
+                onClick = {
+                    scope.launch {
+                        authViewModel.updateUserRemote(
+                            fullName = fullName,
+                            phone = phone,
+                            email = email,
+                            newPassword = if (newPassword.isBlank()) null else newPassword,
+                            onSuccess = {
                                 navController.navigate("perfil") {
                                     popUpTo("perfil") { inclusive = true }
                                 }
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(Color(0xFFFF9933)),
-                    modifier = Modifier.weight(1f)
-                ) { Text("Guardar cambios") }
+                            },
+                            onError = { msg -> authViewModel.errorMessage.value = msg }
+                        )
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(Color(0xFFFF9933)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Guardar cambios", color = Color.White)
             }
 
-            Spacer(Modifier.height(20.dp))
 
             if (authViewModel.errorMessage.value.isNotEmpty()) {
+                Spacer(Modifier.height(20.dp))
                 Text(authViewModel.errorMessage.value, color = Color.Red)
             }
         }
     }
 }
+

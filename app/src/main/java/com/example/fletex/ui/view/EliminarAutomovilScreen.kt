@@ -29,7 +29,8 @@ fun EliminarAutomovilScreen(
     authViewModel: AuthViewModel
 ) {
 
-    val userId = authViewModel.userId.value
+    val mongoId = authViewModel.remoteUserId.value
+    val userEmail = authViewModel.email.value
     val scope = rememberCoroutineScope()
 
     var password by remember { mutableStateOf("") }
@@ -57,7 +58,7 @@ fun EliminarAutomovilScreen(
                 }
 
                 Text(
-                    "Perfil",
+                    "Eliminar vehículo",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF001B4E),
@@ -67,7 +68,7 @@ fun EliminarAutomovilScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Avatar
+            // AVATAR
             Image(
                 painter = painterResource(id = R.drawable.avatar_ejemplo),
                 contentDescription = "Foto",
@@ -79,24 +80,21 @@ fun EliminarAutomovilScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // TÍTULO
             Text(
-                text = "¿Estás seguro que quieres\neliminar automóvil vinculado?",
+                text = "¿Estás seguro que quieres eliminar\ntu vehículo vinculado?",
                 fontSize = 20.sp,
                 color = Color(0xFF001B4E),
                 fontWeight = FontWeight.Bold,
-                lineHeight = 26.sp,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // CAMPO CONTRASEÑA
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Confirma contraseña") },
                 singleLine = true,
+                label = { Text("Ingresa tu contraseña") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -107,14 +105,13 @@ fun EliminarAutomovilScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "La configuración quedará en usuario estándar",
-                color = Color.Gray,
-                fontSize = 13.sp
+                text = "Tu cuenta volverá a modo usuario estándar",
+                fontSize = 13.sp,
+                color = Color.Gray
             )
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // BOTONES
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -134,28 +131,23 @@ fun EliminarAutomovilScreen(
                 // CONFIRMAR
                 Button(
                     onClick = {
-                        if (userId == null) {
-                            errorMessage = "Error con la sesión"
-                            return@Button
-                        }
-
                         if (password.isBlank()) {
                             errorMessage = "Ingresa tu contraseña"
                             return@Button
                         }
 
+                        // Validar la contraseña usando loginRemote
                         scope.launch {
-
-                            authViewModel.eliminarVehiculoConPassword(
-                                passwordIngresada = password,
-                                onError = { msg -> errorMessage = msg },
+                            authViewModel.removeAllVehiclesAndDowngrade(
                                 onSuccess = {
                                     navController.navigate("home") {
                                         popUpTo("homeFletero") { inclusive = true }
                                     }
-                                }
+                                },
+                                onError = { msg -> errorMessage = msg }
                             )
                         }
+
                     },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933))
@@ -166,3 +158,4 @@ fun EliminarAutomovilScreen(
         }
     }
 }
+

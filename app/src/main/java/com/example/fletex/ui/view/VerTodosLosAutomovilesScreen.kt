@@ -13,28 +13,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.fletex.data.local.UserRepository
-import com.example.fletex.data.model.Vehicle
+import com.example.fletex.data.model.VehicleRemote
+import com.example.fletex.data.repository.RemoteVehicleRepository
 import kotlinx.coroutines.launch
 
 @Composable
-fun VerTodosLosAutomovilesScreen(navController: NavController) {
+fun VerTodosLosAutomovilesScreen(
+    navController: NavController
+) {
 
-    val context = LocalContext.current
-    val repository = remember { UserRepository(context) }
+    val repo = remember { RemoteVehicleRepository() }
     val scope = rememberCoroutineScope()
 
-    var vehicles by remember { mutableStateOf(listOf<Vehicle>()) }
+    var vehicles by remember { mutableStateOf<List<VehicleRemote>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Cargar todos los vehículos
+    // Cargar todos los vehículos (directo desde Mongo)
     LaunchedEffect(Unit) {
         scope.launch {
-            vehicles = repository.getAllVehicles()
+            try {
+                vehicles = repo.getAllVehicles()
+            } catch (e: Exception) {
+                errorMessage = "Error cargando vehículos: ${e.message}"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
@@ -49,10 +57,9 @@ fun VerTodosLosAutomovilesScreen(navController: NavController) {
                 .padding(16.dp)
         ) {
 
-            // Header
+            // ---------------- HEADER ----------------
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { navController.popBackStack() }) {
@@ -62,24 +69,36 @@ fun VerTodosLosAutomovilesScreen(navController: NavController) {
                 Text(
                     text = "Todos los Automóviles",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
                     color = Color(0xFF001B4E)
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (vehicles.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Aún no hay vehículos registrados", color = Color.Gray)
+            when {
+                isLoading -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFFFF9933))
+                    }
                 }
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(vehicles) { vehicle ->
-                        VehicleCard(vehicle)
+
+                errorMessage != null -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Text(errorMessage!!, color = Color.Red)
+                    }
+                }
+
+                vehicles.isEmpty() -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Text("Aún no hay vehículos registrados", color = Color.Gray)
+                    }
+                }
+
+                else -> {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(vehicles) { vehicle ->
+                            VehicleCard(vehicle)
+                        }
                     }
                 }
             }
@@ -88,7 +107,7 @@ fun VerTodosLosAutomovilesScreen(navController: NavController) {
 }
 
 @Composable
-fun VehicleCard(vehicle: Vehicle) {
+fun VehicleCard(vehicle: VehicleRemote) {
 
     Column(
         modifier = Modifier
@@ -97,18 +116,22 @@ fun VehicleCard(vehicle: Vehicle) {
             .background(Color.White)
             .padding(16.dp)
     ) {
+
         Text(
             text = "Patente: ${vehicle.patente}",
             fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = Color(0xFF001B4E)
+            color = Color(0xFF001B4E),
+            fontSize = 18.sp
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(Modifier.height(6.dp))
 
         Text("Tipo: ${vehicle.tipo}", color = Color(0xFF333333))
         Text("Tamaño: ${vehicle.tamano}", color = Color(0xFF333333))
         Text("Capacidad: ${vehicle.capacidad}", color = Color(0xFF333333))
-        Text("Dueño (ID usuario): ${vehicle.userId}", color = Color.Gray, fontSize = 12.sp)
+
+        Spacer(Modifier.height(6.dp))
+
+        Text("ID Usuario: ${vehicle.userId}", color = Color.Gray, fontSize = 12.sp)
     }
 }

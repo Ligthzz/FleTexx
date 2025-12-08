@@ -119,6 +119,8 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel) {
                     onValueChange = {
                         email = it
                         emailError = !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
+
+                        email = it
                     },
                     isError = emailError,
                     label = { Text("Correo electrónico") },
@@ -168,20 +170,23 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel) {
 
                             isRegistering = true
 
-                            viewModel.register(
-                                fullName,
-                                phone,
-                                email,
-                                password,
-                                confirmPassword
-                            ) {
-                                scope.launch {
-                                    delay(1200)
-                                    snackbarHostState.showSnackbar("Registro exitoso 🎉")
+                            viewModel.registerRemote(
+                                fullName = fullName,
+                                phone = phone,
+                                email = email,
+                                password = password,
+                                onSuccess = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Registro exitoso 🎉")
+                                        isRegistering = false
+                                        navController.navigate("login")
+                                    }
+                                },
+                                onError = { msg ->
+                                    viewModel.errorMessage.value = msg
                                     isRegistering = false
-                                    navController.navigate("login")
                                 }
-                            }
+                            )
 
                         } else {
                             viewModel.errorMessage.value = "Corrige los campos marcados"

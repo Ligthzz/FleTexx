@@ -19,7 +19,9 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FleTex">
+        android:theme="@style/Theme.FleTex"
+        android:usesCleartextTraffic="true"
+        >
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDoaCe4_cT_JuHl2C_d7EbHejnzemdvhrc" />

@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.fletex.data.model.VehicleRemote
 import com.example.fletex.ui.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
@@ -24,77 +25,74 @@ fun EditarVehiculoScreen(
     navController: NavController,
     authViewModel: AuthViewModel
 ) {
-
+    val userId = authViewModel.remoteUserId.value
     val scope = rememberCoroutineScope()
-    val userId = authViewModel.userId.value
 
-    if (userId == null) {
-        Box(Modifier.fillMaxSize(), Alignment.Center) {
-            CircularProgressIndicator()
-        }
+    val snack = remember { SnackbarHostState() }
+
+    if (userId.isBlank()) {
+        Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
         return
     }
 
-    // -------- CAMPOS --------
+    // ---------- CAMPOS ----------
     var tipo by remember { mutableStateOf("") }
     var patente by remember { mutableStateOf("") }
     var tamano by remember { mutableStateOf("") }
     var capacidad by remember { mutableStateOf("") }
+    var vehiculoId by remember { mutableStateOf<String?>(null) }
 
-    // -------- ERRORES --------
+    // ---------- ERRORES ----------
     var tipoError by remember { mutableStateOf(false) }
     var patenteError by remember { mutableStateOf(false) }
     var tamanoError by remember { mutableStateOf(false) }
     var capacidadError by remember { mutableStateOf(false) }
 
-    val snack = remember { SnackbarHostState() }
-
-    // -------- CARGAR VEHÍCULO --------
+    // ---------- CARGAR VEHÍCULO ----------
     LaunchedEffect(Unit) {
-        authViewModel.getMyVehicles { list ->
-            if (list.isNotEmpty()) {
-                val v = list.first()
-                tipo = v.tipo
-                patente = v.patente
-                tamano = v.tamano
-                capacidad = v.capacidad
+        authViewModel.getMyVehiclesRemote(
+            onResult = { list ->
+                if (list.isNotEmpty()) {
+                    val v = list.first()
+                    vehiculoId = v._id
+                    tipo = v.tipo
+                    patente = v.patente
+                    tamano = v.tamano
+                    capacidad = v.capacidad
+                }
+            },
+            onError = { msg ->
+                scope.launch { snack.showSnackbar(msg) }
             }
-        }
+        )
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snack) }) { padding ->
-
         Column(
             modifier = Modifier
                 .padding(padding)
                 .background(Color(0xFFE6F4FA))
-                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp)
+                .fillMaxSize()
         ) {
 
-            // ---------------- HEADER ----------------
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // ---------- HEADER ----------
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                 }
-
                 Text(
                     "Editar automóvil",
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF001B4E),
-                    modifier = Modifier.padding(start = 5.dp)
+                    color = Color(0xFF001B4E)
                 )
             }
 
             Spacer(Modifier.height(20.dp))
 
-            // ---------------- CAMPOS ----------------
-
+            // ---------- CAMPOS ----------
             Text("Tipo de flete", fontWeight = FontWeight.Bold)
             OutlinedTextField(
                 value = tipo,
@@ -109,42 +107,45 @@ fun EditarVehiculoScreen(
             Text("Patente", fontWeight = FontWeight.Bold)
             OutlinedTextField(
                 value = patente,
-                onValueChange = { patente = it; patenteError = it.length < 5 },
+                onValueChange = {
+                    patente = it.uppercase()
+                    patenteError = it.length < 5
+                },
                 isError = patenteError,
                 modifier = Modifier.fillMaxWidth()
             )
-            if (patenteError) Text("Formato inválido", color = Color.Red)
+            if (patenteError) Text("Patente inválida", color = Color.Red)
 
             Spacer(Modifier.height(12.dp))
 
-            Text("Tamaño de flete", fontWeight = FontWeight.Bold)
+            Text("Tamaño", fontWeight = FontWeight.Bold)
             OutlinedTextField(
                 value = tamano,
                 onValueChange = { tamano = it; tamanoError = it.isBlank() },
                 isError = tamanoError,
                 modifier = Modifier.fillMaxWidth()
             )
-            if (tamanoError) Text("Campo obligatorio", color = Color.Red)
+            if (tamanoError) Text("Tamaño obligatorio", color = Color.Red)
 
             Spacer(Modifier.height(12.dp))
 
-            Text("Capacidad (kg)", fontWeight = FontWeight.Bold)
+            Text("Capacidad (KG)", fontWeight = FontWeight.Bold)
             OutlinedTextField(
                 value = capacidad,
-                onValueChange = { capacidad = it; capacidadError = it.toIntOrNull() == null },
+                onValueChange = {
+                    capacidad = it
+                    capacidadError = it.toIntOrNull() == null
+                },
                 isError = capacidadError,
                 modifier = Modifier.fillMaxWidth()
             )
-            if (capacidadError) Text("Debe ser un número", color = Color.Red)
+            if (capacidadError) Text("Debe ser número", color = Color.Red)
 
             Spacer(Modifier.height(30.dp))
 
-            // ---------------- BOTONES ----------------
-
-            // GUARDAR CAMBIOS
+            // ---------- GUARDAR ----------
             Button(
                 onClick = {
-
                     if (tipoError || patenteError || tamanoError || capacidadError ||
                         tipo.isBlank() || patente.isBlank() || tamano.isBlank() || capacidad.isBlank()
                     ) {
@@ -152,46 +153,76 @@ fun EditarVehiculoScreen(
                         return@Button
                     }
 
-                    authViewModel.getMyVehicles { list ->
-                        if (list.isNotEmpty()) {
-                            val original = list.first()
-
-                            scope.launch {
-                                authViewModel.updateVehicle(
-                                    original.copy(
-                                        tipo = tipo.trim(),
-                                        patente = patente.trim(),
-                                        tamano = tamano.trim(),
-                                        capacidad = capacidad.trim()
-                                    )
-                                )
-                                snack.showSnackbar("Vehículo actualizado")
-                            }
-                        }
+                    val vid = vehiculoId
+                    if (vid == null) {
+                        scope.launch { snack.showSnackbar("No se pudo identificar el vehículo") }
+                        return@Button
                     }
 
+                    val body = VehicleRemote(
+                        _id = vid,
+                        userId = userId,
+                        tipo = tipo.trim(),
+                        patente = patente.trim(),
+                        tamano = tamano.trim(),
+                        capacidad = capacidad.trim()
+                    )
+
+                    scope.launch {
+                        authViewModel.updateVehicleRemote(
+                            vehicle = body,
+                            onSuccess = {
+                                scope.launch {
+                                    snack.showSnackbar("vehiculo actualizado con exito")
+                                }
+
+                            },
+                            onError = { msg ->
+                                scope.launch {
+                                    snack.showSnackbar("msg")
+                                }
+
+                            }
+                        )
+                    }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933))
+                colors = ButtonDefaults.buttonColors(Color(0xFFFF9933)),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Guardar cambios", color = Color.White)
             }
 
             Spacer(Modifier.height(20.dp))
 
-            // ELIMINAR VEHÍCULO
+            // ---------- ELIMINAR VEHÍCULO ----------
             Button(
                 onClick = {
+                    val id = vehiculoId
+                    if (id == null) {
+                        scope.launch { snack.showSnackbar("No hay vehículo para eliminar") }
+                        return@Button
+                    }
+
                     scope.launch {
-                        authViewModel.removeAllVehiclesAndDowngrade {
-                            navController.navigate("home") {
-                                popUpTo("homeFletero") { inclusive = true }
+                        authViewModel.deleteVehicleRemote(
+                            vehicleId = id,
+                            onSuccess = {
+                                authViewModel.downgradeRoleIfNoVehicles()
+                                scope.launch {
+                                    snack.showSnackbar("vehiculo eliminado")
+                                }
+
+                                navController.popBackStack()
+                            },
+                            onError = { msg ->scope.launch {
+                                snack.showSnackbar(msg)
                             }
-                        }
+                            }
+                        )
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCC4A4A))
+                colors = ButtonDefaults.buttonColors(Color(0xFFCC4A4A)),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Eliminar vehículo", color = Color.White)
             }

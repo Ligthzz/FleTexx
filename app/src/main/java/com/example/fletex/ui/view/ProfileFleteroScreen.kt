@@ -17,8 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fletex.R
-import com.example.fletex.data.local.UserRepository
-import com.example.fletex.data.model.Vehicle
+import com.example.fletex.data.model.VehicleRemote
 import com.example.fletex.ui.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
@@ -28,23 +27,22 @@ fun ProfileFleteroScreen(
     authViewModel: AuthViewModel
 ) {
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val repository = remember { UserRepository(context) }
     val scope = rememberCoroutineScope()
 
-    val userId = authViewModel.userId.value
+    val userId = authViewModel.remoteUserId.value
     val fullName = authViewModel.fullName.value
     val email = authViewModel.email.value
 
-    var vehicle by remember { mutableStateOf<Vehicle?>(null) }
+    var vehicle by remember { mutableStateOf<VehicleRemote?>(null) }
+    var errorMessage by remember { mutableStateOf("") }
 
-    // --- Cargar vehículo del usuario ---
+    // --- Cargar vehículo del usuario desde MongoDB ---
     LaunchedEffect(userId) {
-        if (userId != null) {
-            scope.launch {
-                val list = repository.vehiclesByUser(userId)
-                vehicle = list.firstOrNull()
-            }
+        if (userId.isNotBlank()) {
+            authViewModel.getMyVehiclesRemote(
+                onResult = { list -> vehicle = list.firstOrNull() },
+                onError = { msg -> errorMessage = msg }
+            )
         }
     }
 
@@ -96,76 +94,81 @@ fun ProfileFleteroScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-
             // ===== INFORMACIÓN DEL VEHÍCULO =====
-            if (vehicle == null) {
-
-                CircularProgressIndicator(color = Color(0xFFFF9933))
-                Spacer(modifier = Modifier.height(10.dp))
-                Text("Cargando vehículo...", color = Color.Gray)
-
-            } else {
-
-                // TARJETA DE VEHÍCULO
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White)
-                        .padding(16.dp)
-                ) {
-                    Text("Mi vehículo", fontWeight = FontWeight.Bold, color = Color(0xFF001B4E), fontSize = 18.sp)
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Tipo: ${vehicle!!.tipo}")
-                    Text("Patente: ${vehicle!!.patente}")
-                    Text("Tamaño: ${vehicle!!.tamano}")
-                    Text("Capacidad: ${vehicle!!.capacidad}")
+            when {
+                errorMessage.isNotEmpty() -> {
+                    Text(errorMessage, color = Color.Red)
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                vehicle == null -> {
+                    CircularProgressIndicator(color = Color(0xFFFF9933))
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text("Cargando vehículo...", color = Color.Gray)
+                }
 
-                // BOTÓN EDITAR VEHÍCULO
-                Button(
-                    onClick = { navController.navigate("editarAutomovil") },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                ) { Text("Editar automóvil", color = Color.White) }
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .padding(16.dp)
+                    ) {
+                        Text("Mi vehículo", fontWeight = FontWeight.Bold, color = Color(0xFF001B4E), fontSize = 18.sp)
 
-                Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Tipo: ${vehicle!!.tipo}")
+                        Text("Patente: ${vehicle!!.patente}")
+                        Text("Tamaño: ${vehicle!!.tamano}")
+                        Text("Capacidad: ${vehicle!!.capacidad} kg")
+                    }
 
-                // BOTÓN ELIMINAR VEHÍCULO
-                Button(
-                    onClick = {
-                        scope.launch {
-                            authViewModel.removeAllVehiclesAndDowngrade {
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // BOTÓN EDITAR VEHÍCULO
+                    Button(
+                        onClick = { navController.navigate("editarAutomovil") },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9933)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                    ) {
+                        Text("Editar automóvil", color = Color.White)
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // BOTÓN ELIMINAR VEHÍCULO
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                authViewModel.downgradeRoleIfNoVehicles()
                                 navController.navigate("home") {
                                     popUpTo("homeFletero") { inclusive = true }
                                 }
                             }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                ) { Text("Eliminar vehículo", color = Color.White) }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                    ) {
+                        Text("Eliminar vehículo", color = Color.White)
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(30.dp))
 
-
             // BOTÓN CERRAR SESIÓN
             TextButton(
                 onClick = {
+                    authViewModel.remoteUserId.value = ""
                     authViewModel.fullName.value = ""
                     authViewModel.email.value = ""
-                    authViewModel.password.value = ""
-                    authViewModel.userId.value = null
+                    authViewModel.phone.value = ""
                     authViewModel.role.value = "usuario"
 
                     navController.navigate("login") {
@@ -178,13 +181,10 @@ fun ProfileFleteroScreen(
 
             // BOTÓN ELIMINAR CUENTA
             TextButton(
-                onClick = {
-                    navController.navigate("eliminarCuenta")
-                }
+                onClick = { navController.navigate("eliminarCuenta") }
             ) {
                 Text("Eliminar cuenta", color = Color(0xFF001B4E))
             }
-
         }
     }
 }

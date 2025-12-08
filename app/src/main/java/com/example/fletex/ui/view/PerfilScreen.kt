@@ -23,12 +23,14 @@ import com.example.fletex.ui.viewmodel.AuthViewModel
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    authViewModel: AuthViewModel   // ← SE RECIBE EL GLOBAL
+    authViewModel: AuthViewModel
 ) {
 
-    val fullName = authViewModel.fullName.value
-    val email = authViewModel.email.value
-    val userId = authViewModel.userId.value
+    val fullName by authViewModel.fullName
+    val email by authViewModel.email
+    val phone by authViewModel.phone
+    val role by authViewModel.role
+    val remoteUserId by authViewModel.remoteUserId   // ↓ usamos este, NO el userId viejo local
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -70,14 +72,27 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (userId != null) {
+            if (remoteUserId.isNotBlank()) {
+
                 Text(
                     fullName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     color = Color(0xFF001B4E)
                 )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(email, color = Color.Gray, fontSize = 14.sp)
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text("Teléfono: $phone", color = Color.DarkGray, fontSize = 14.sp)
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text("Rol: ${role.uppercase()}", color = Color(0xFF001B4E), fontSize = 14.sp)
+
             } else {
                 CircularProgressIndicator(color = Color(0xFFFF9933))
                 Text("Cargando perfil...", color = Color.Gray)
@@ -100,10 +115,13 @@ fun ProfileScreen(
 
             TextButton(
                 onClick = {
+                    // limpiar datos del viewmodel al cerrar sesión
                     authViewModel.fullName.value = ""
                     authViewModel.email.value = ""
                     authViewModel.password.value = ""
-                    authViewModel.userId.value = null
+                    authViewModel.remoteUserId.value = ""
+                    authViewModel.phone.value = ""
+                    authViewModel.role.value = "usuario"
 
                     navController.navigate("login") {
                         popUpTo("welcome") { inclusive = true }

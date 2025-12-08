@@ -1,6 +1,6 @@
 package com.example.fletex.data.model
 
-data class Vehicle(
+data class VehicleRemote(
     val _id: String? = null,
     val userId: String,
     val tipo: String,

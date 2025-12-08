@@ -125,7 +125,7 @@ fun RegistrarFleteScreen(
                         return@Button
                     }
 
-                    vm.registerVehicle(
+                    vm.createVehicle(
                         tipo.trim(),
                         patente.trim(),
                         tamano.trim(),
@@ -144,6 +144,7 @@ fun RegistrarFleteScreen(
             ) {
                 Text("Registrar flete", color = Color.White)
             }
+
         }
 
         // -------- DIALOG --------

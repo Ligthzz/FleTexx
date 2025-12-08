@@ -14,25 +14,26 @@ import com.example.fletex.ui.viewmodel.AuthViewModel
 @Composable
 fun EliminarCuentaScreen(
     navController: NavController,
-    authViewModel: AuthViewModel   // ⬅️ ESTE VIENE DEL MAIN (EL CORRECTO)
+    authViewModel: AuthViewModel
 ) {
 
-    val userId = authViewModel.userId.value
+    val userId = authViewModel.remoteUserId.value
 
-    if (userId == null) {
+    var password by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf("") }
+
+    if (userId.isBlank()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         return
     }
 
-    var password by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf("") }
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFE6F4FA)
     ) {
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(20.dp)
@@ -50,7 +51,10 @@ fun EliminarCuentaScreen(
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = {
+                    password = it
+                    error = ""
+                },
                 label = { Text("Confirma contraseña") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -65,7 +69,7 @@ fun EliminarCuentaScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // CANCELAR
+
                 Button(
                     onClick = { navController.popBackStack() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA856)),
@@ -76,12 +80,15 @@ fun EliminarCuentaScreen(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // CONFIRMAR
                 Button(
                     onClick = {
-                        authViewModel.deleteUser(
-                            id = userId,
-                            passwordEntered = password,
+                        if (password.isBlank()) {
+                            error = "Debes ingresar tu contraseña"
+                            return@Button
+                        }
+
+                        authViewModel.deleteUserRemote(
+                            password = password,
                             onSuccess = {
                                 navController.navigate("login") {
                                     popUpTo("welcome") { inclusive = true }
@@ -93,8 +100,10 @@ fun EliminarCuentaScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDF4E4E)),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Confirmar", color = Color.White)
+                    Text("Eliminar", color = Color.White)
                 }
+
+
             }
         }
     }

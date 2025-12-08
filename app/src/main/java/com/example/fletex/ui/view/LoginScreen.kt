@@ -31,6 +31,7 @@ fun LoginScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
 
@@ -118,23 +119,27 @@ fun LoginScreen(
                     onClick = {
                         if (!emailError && !passwordError) {
 
-                            authViewModel.login {
-
-                                //  DESPUÉS DE LOGEAR → VERIFICA ROL
-                                if (authViewModel.role.value == "conductor") {
-                                    navController.navigate("homeFletero") {
-                                        popUpTo("login") { inclusive = true }
+                            authViewModel.loginRemote(
+                                email = authViewModel.email.value,
+                                password = authViewModel.password.value,
+                                onSuccess = {
+                                    if (authViewModel.role.value == "conductor") {
+                                        navController.navigate("homeFletero") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    } else {
+                                        navController.navigate("home") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
                                     }
-                                } else {
-                                    navController.navigate("home") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
+                                },
+                                onError = { msg ->
+                                    authViewModel.errorMessage.value = msg
                                 }
-                            }
+                            )
 
                         } else {
-                            authViewModel.errorMessage.value =
-                                "Corrige los campos antes de continuar"
+                            authViewModel.errorMessage.value = "Datos incorrectos"
                         }
                     },
                     modifier = Modifier
@@ -153,6 +158,7 @@ fun LoginScreen(
                         Text("Iniciar Sesión", color = Color.White)
                     }
                 }
+
 
 
                 // ERROR GENERAL

@@ -1,335 +1,371 @@
 package com.example.fletex.ui.viewmodel
 
 import android.app.Application
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fletex.data.local.UserRepository
-import com.example.fletex.data.model.User
+import com.example.fletex.data.model.UserRemote
+import com.example.fletex.data.model.VehicleRemote
+import com.example.fletex.data.repository.RemoteUserRepository
+import com.example.fletex.data.repository.RemoteVehicleRepository
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.mutableStateOf
-import com.example.fletex.data.model.Vehicle
-import kotlinx.coroutines.delay
-
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
-    var isLoading = mutableStateOf(false)
+    // Repositorios
+    private val userRepo = RemoteUserRepository()
+    private val vehicleRepo = RemoteVehicleRepository()
 
-    private val repository = UserRepository(application.applicationContext)
-
+    // Estado del usuario logeado
+    var remoteUserId = mutableStateOf("")
     var fullName = mutableStateOf("")
     var phone = mutableStateOf("")
     var email = mutableStateOf("")
-    var password = mutableStateOf("")
+    var role = mutableStateOf("usuario")
+    var isLoading = mutableStateOf(false)
     var errorMessage = mutableStateOf("")
-    var userId = mutableStateOf<Int?>(null)
-    var role = mutableStateOf("usuario") // <- vivo
+    var password = mutableStateOf("")
 
-    fun register(
+
+    // ----------------------------------------------------
+    //                  REGISTER REMOTO
+    // ----------------------------------------------------
+    fun registerRemote(
         fullName: String,
         phone: String,
         email: String,
         password: String,
-        confirmPassword: String,
-        onSuccess: () -> Unit
-    ) {
-        // VALIDACIONES
-        when {
-            fullName.isBlank() -> {
-                errorMessage.value = "El nombre es obligatorio"
-                return
-            }
-
-            phone.isBlank() || !phone.matches(Regex("^\\+?\\d{8,15}$")) -> {
-                errorMessage.value = "Número de teléfono inválido"
-                return
-            }
-
-            email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                errorMessage.value = "Correo inválido"
-                return
-            }
-
-            password.length < 6 -> {
-                errorMessage.value = "La contraseña debe tener mínimo 6 caracteres"
-                return
-            }
-
-            password != confirmPassword -> {
-                errorMessage.value = "Las contraseñas no coinciden"
-                return
-            }
-        }
-
-        // SI ESTA TODO BIEN
-        viewModelScope.launch {
-            val newUser = User(
-                fullName = fullName,
-                phone = phone,
-                email = email,
-                password = password,
-                role = "usuario"   //  IMPORTANTE POR EL CAMBIO DE ROL
-            )
-
-            repository.registerUser(newUser)
-
-            // limpia estados
-            this@AuthViewModel.fullName.value = ""
-            this@AuthViewModel.email.value = ""
-            this@AuthViewModel.password.value = ""
-
-            errorMessage.value = ""
-
-            onSuccess()
-        }
-    }
-
-
-    // LOGIN (actualizado para setear userId y role)
-    fun login(onSuccess: () -> Unit) {
-        viewModelScope.launch {
-            isLoading.value = true
-            val user = repository.loginUser(email.value, password.value)
-            delay(600)
-            if (user != null) {
-                fullName.value = user.fullName
-                phone.value = user.phone
-                userId.value = user.id
-                role.value = user.role
-                email.value = user.email
-                password.value = user.password
-                errorMessage.value = ""
-                isLoading.value = false
-                onSuccess()
-            } else {
-                errorMessage.value = "Credenciales incorrectas"
-                isLoading.value = false
-            }
-        }
-    }
-    fun deleteUser(
-        id: Int,
-        passwordEntered: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
-    ) {
-        if (passwordEntered.isBlank()) {
-            onError("Debes ingresar tu contraseña")
-            return
+    ) = viewModelScope.launch {
+
+        try {
+            isLoading.value = true
+
+            val created = userRepo.registerUser(fullName, phone, email, password)
+
+            remoteUserId.value = created._id ?: ""
+            this@AuthViewModel.fullName.value = created.fullName
+            this@AuthViewModel.phone.value = created.phone
+            this@AuthViewModel.email.value = created.email
+            this@AuthViewModel.role.value = created.role
+
+            onSuccess()
+
+        } catch (e: Exception) {
+            onError(e.message ?: "Error registrando usuario")
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    // ----------------------------------------------------
+    //                     LOGIN
+    // ----------------------------------------------------
+    fun loginRemote(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) = viewModelScope.launch {
+
+        try {
+            isLoading.value = true
+
+            val response = userRepo.login(email, password)
+
+            remoteUserId.value = response.user._id ?: ""
+            fullName.value = response.user.fullName
+            phone.value = response.user.phone
+            this@AuthViewModel.email.value = response.user.email
+            role.value = response.user.role
+
+            onSuccess()
+
+        } catch (e: Exception) {
+            onError("Credenciales inválidas")
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+
+    // ----------------------------------------------------
+    //               ACTUALIZAR PERFIL REMOTO
+    // ----------------------------------------------------
+    fun updateUserRemote(
+        fullName: String,
+        phone: String,
+        email: String,
+        newPassword: String?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) = viewModelScope.launch {
+
+        val id = remoteUserId.value
+        if (id.isBlank()) {
+            onError("Usuario inválido")
+            return@launch
         }
 
-        viewModelScope.launch {
-            // 1. Obtener el usuario desde la BD
-            val user = repository.getUserById(id)
+        try {
+            isLoading.value = true
 
-            if (user == null) {
-                onError("Error: Usuario no encontrado")
+            val updated = userRepo.updateUser(
+                id,
+                UserRemote(
+                    _id = id,
+                    fullName = fullName,
+                    phone = phone,
+                    email = email,
+                    password = newPassword ?: "",
+                    role = role.value
+                )
+            )
+
+            this@AuthViewModel.fullName.value = updated.fullName
+            this@AuthViewModel.phone.value = updated.phone
+            this@AuthViewModel.email.value = updated.email
+            this@AuthViewModel.role.value = updated.role
+
+            onSuccess()
+
+        } catch (e: Exception) {
+            onError(e.message ?: "Error actualizando usuario")
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+
+    // ----------------------------------------------------
+    //               OBTENER MIS VEHÍCULOS
+    // ----------------------------------------------------
+    fun getMyVehiclesRemote(
+        onResult: (List<VehicleRemote>) -> Unit,
+        onError: (String) -> Unit
+    ) = viewModelScope.launch {
+
+        val id = remoteUserId.value
+        if (id.isBlank()) {
+            onResult(emptyList())
+            return@launch
+        }
+
+        try {
+            val list = vehicleRepo.getMyVehicles(id)
+            onResult(list)
+        } catch (e: Exception) {
+            onError(e.message ?: "Error obteniendo vehículos")
+        }
+    }
+
+
+    // ----------------------------------------------------
+    //               EDITAR VEHÍCULO REMOTO
+    // ----------------------------------------------------
+    fun updateVehicleRemote(
+        vehicle: VehicleRemote,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) = viewModelScope.launch {
+
+        try {
+            val id = vehicle._id ?: return@launch onError("Vehículo sin ID")
+
+            vehicleRepo.updateVehicle(id, vehicle)
+            onSuccess()
+
+        } catch (e: Exception) {
+            onError(e.message ?: "Error actualizando vehículo")
+        }
+    }
+
+    // ----------------------------------------------------
+    //               ELIMINAR VEHÍCULO REMOTO
+    // ----------------------------------------------------
+    fun deleteVehicleRemote(
+        vehicleId: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) = viewModelScope.launch {
+
+        try {
+            vehicleRepo.deleteVehicle(vehicleId)
+            onSuccess()
+
+        } catch (e: Exception) {
+            onError(e.message ?: "Error eliminando vehículo")
+        }
+    }
+
+
+    // ----------------------------------------------------
+    //     BAJAR ROL SI NO QUEDAN VEHÍCULOS
+    // ----------------------------------------------------
+    fun downgradeRoleIfNoVehicles() = viewModelScope.launch {
+
+        val userId = remoteUserId.value
+        if (userId.isBlank()) return@launch
+
+        val list = vehicleRepo.getMyVehicles(userId)
+
+        if (list.isEmpty()) {
+            role.value = "usuario"
+
+            userRepo.updateUser(
+                userId,
+                UserRemote(
+                    _id = userId,
+                    fullName = fullName.value,
+                    phone = phone.value,
+                    email = email.value,
+                    password = "",
+                    role = "usuario"
+                )
+            )
+        }
+    }
+
+    // ---------------------------
+//   ELIMINAR CUENTA REMOTO
+// ---------------------------
+    fun deleteUserRemote(
+        password: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) = viewModelScope.launch {
+
+        try {
+            isLoading.value = true
+
+            val id = remoteUserId.value
+            if (id.isBlank()) {
+                onError("Usuario inválido")
                 return@launch
             }
 
-            // 2. Validar contraseña
-            if (user.password != passwordEntered) {
-                onError("La contraseña es incorrecta")
-                return@launch
-            }
+            userRepo.deleteUserRemote(id, password)
 
-            // 3. Borrar vehículos asociados
-            repository.deleteVehiclesByUser(id)
-
-            // 4. Borrar al usuario
-            repository.deleteUser(user.id)
-
-
-            // 5. Limpiar estados del viewmodel
+            // Limpiar memoria
+            remoteUserId.value = ""
             fullName.value = ""
             email.value = ""
-            password.value = ""
-            userId.value = null
+            phone.value = ""
             role.value = "usuario"
 
             onSuccess()
+
+        } catch (e: Exception) {
+            onError(e.message ?: "Error eliminando usuario")
+        } finally {
+            isLoading.value = false
         }
     }
 
+    // ----------------------------------------------------
+//  ELIMINAR TODOS LOS VEHÍCULOS Y BAJAR ROL
+// ----------------------------------------------------
+    fun removeAllVehiclesAndDowngrade(
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) = viewModelScope.launch {
+
+        val id = remoteUserId.value
+        if (id.isBlank()) {
+            onError("Usuario inválido")
+            return@launch
+        }
+
+        try {
+            // Obtener todos los vehículos remotos
+            val list = vehicleRepo.getMyVehicles(id)
+
+            // Eliminar cada vehículo
+            list.forEach { v ->
+                v._id?.let { vehicleRepo.deleteVehicle(it) }
+            }
+
+            // Cambiar rol a usuario normal
+            role.value = "usuario"
+
+            // Actualizar backend
+            userRepo.updateUser(
+                id,
+                UserRemote(
+                    _id = id,
+                    fullName = fullName.value,
+                    phone = phone.value,
+                    email = email.value,
+                    password = "",   // no se actualiza pass
+                    role = "usuario"
+                )
+            )
+
+            onSuccess()
+
+        } catch (e: Exception) {
+            onError(e.message ?: "Error eliminando vehículo(s)")
+        }
+    }
     fun getUserName(): String {
         return fullName.value.ifBlank { "Usuario" }
     }
-    fun getUserRole(): String {
-        return role.value
+    fun getUserEmail(): String {
+        return email.value.ifBlank { "email@desconocido.com" }
     }
-
-
-    fun updateUser(
-        id: Int,
-        fullName: String,
-        phone: String,
-        email: String,
-        password: String,
-        confirmPassword: String,
-        onSuccess: () -> Unit
-    ) {
-        // VALIDACIONES
-        when {
-            fullName.isBlank() -> {
-                errorMessage.value = "El nombre no puede estar vacío"
-                return
-            }
-            phone.isBlank() -> {
-                errorMessage.value = "El teléfono es obligatorio"
-                return
-            }
-            !phone.matches(Regex("^\\+?\\d{8,15}\$")) -> {
-                errorMessage.value = "Formato de teléfono no válido"
-                return
-            }
-            email.isBlank() -> {
-                errorMessage.value = "El correo no puede estar vacío"
-                return
-            }
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                errorMessage.value = "Formato de correo inválido"
-                return
-            }
-
-            // si escribe contraseña nueva, debe confirmar
-            password.isNotBlank() && password != confirmPassword -> {
-                errorMessage.value = "Las contraseñas no coinciden"
-                return
-            }
-        }
-
-        viewModelScope.launch {
-            val newPassword = if (password.isBlank()) {
-                this@AuthViewModel.password.value // mantiene la original
-            } else {
-                password
-            }
-
-            val updatedUser = User(
-                id = id,
-                fullName = fullName,
-                phone = phone,
-                email = email,
-                password = newPassword,
-                role = role.value // mantiene su rol actual
-            )
-
-            repository.updateUser(updatedUser)
-            errorMessage.value = ""
-
-            // Actualiza datos en memoria también
-            this@AuthViewModel.fullName.value = fullName
-            this@AuthViewModel.email.value = email
-            this@AuthViewModel.password.value = newPassword
-
-            onSuccess()
-        }
-    }
-
-
-    // Registrar vehículo -> cambia a "conductor"
-    fun registerVehicle(
+    fun createVehicle(
         tipo: String,
         patente: String,
         tamano: String,
         capacidad: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
-    ) {
-        val uid = userId.value
-        if (uid == null) { onError("Usuario no válido"); return }
+    ) = viewModelScope.launch {
+        try {
+            isLoading.value = true
 
-        // validaciones simples
-        when {
-            tipo.isBlank() -> onError("El tipo de flete es obligatorio")
-            patente.isBlank() -> onError("La patente es obligatoria")
-            tamano.isBlank() -> onError("El tamaño es obligatorio")
-            capacidad.isBlank() -> onError("La capacidad es obligatoria")
-            else -> viewModelScope.launch {
-                repository.insertVehicle(
-                    Vehicle(
-                        userId = uid,
-                        tipo = tipo.trim(),
-                        patente = patente.trim(),
-                        tamano = tamano.trim(),
-                        capacidad = capacidad.trim()
-                    )
+            val uid = remoteUserId.value
+            if (uid.isBlank()) {
+                onError("Sesión inválida. Vuelve a iniciar sesión.")
+                return@launch
+            }
+
+            // Construir vehículo remoto
+            val body = VehicleRemote(
+                _id = null,           // lo crea Mongo
+                userId = uid,
+                tipo = tipo,
+                patente = patente,
+                tamano = tamano,
+                capacidad = capacidad
+            )
+
+            // 1) Crear vehículo
+            vehicleRepo.createVehicle(body)
+
+            // 2) Elevar rol a "conductor" (consistencia backend + estado local)
+            role.value = "conductor"
+            userRepo.updateUser(
+                uid,
+                UserRemote(
+                    _id = uid,
+                    fullName = fullName.value,
+                    phone = phone.value,
+                    email = email.value,
+                    password = "",     // no cambiamos password
+                    role = "conductor"
                 )
-                // actualiza rol en DB y en memoria
-                repository.updateUserRole(uid, "conductor")
-                role.value = "conductor"
-                onSuccess()
-            }
-        }
-    }
-
-    // Eliminar TODOS los vehículos del usuario -> vuelve a "usuario"
-    fun removeAllVehiclesAndDowngrade(onSuccess: () -> Unit) {
-        val uid = userId.value ?: return
-        viewModelScope.launch {
-            repository.deleteVehiclesByUser(uid)
-            repository.updateUserRole(uid, "usuario")
-            role.value = "usuario"
-            onSuccess()
-        }
-    }
-
-    fun getMyVehicles(onResult: (List<Vehicle>) -> Unit) {
-        val uid = userId.value ?: return
-
-        viewModelScope.launch {
-            val list = repository.getVehiclesByUser(uid)
-            onResult(list)
-        }
-    }
-
-    fun eliminarVehiculoConPassword(
-        passwordIngresada: String,
-        onError: (String) -> Unit,
-        onSuccess: () -> Unit
-    ) {
-        val uid = userId.value ?: return onError("Usuario inválido")
-
-        if (passwordIngresada.isBlank()) {
-            onError("Debes ingresar tu contraseña")
-            return
-        }
-
-        viewModelScope.launch {
-
-            // Obtener usuario REAL
-            val user = repository.getUserById(uid)
-
-            if (user == null) {
-                onError("Usuario no encontrado")
-                return@launch
-            }
-
-            // Validar contraseña
-            if (user.password != passwordIngresada) {
-                onError("Contraseña incorrecta")
-                return@launch
-            }
-
-            // Eliminar vehículos
-            repository.deleteVehiclesByUser(uid)
-
-            // Restaurar rol normal
-            repository.updateUserRole(uid, "usuario")
-            role.value = "usuario"
+            )
 
             onSuccess()
+
+        } catch (e: Exception) {
+            onError(e.message ?: "Error creando vehículo")
+        } finally {
+            isLoading.value = false
         }
     }
-    fun updateVehicle(v: Vehicle) {
-        viewModelScope.launch {
-            repository.updateVehicle(v)
-        }
-    }
-
-
-
-
 
 
 }
