@@ -108,20 +108,19 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             return@launch
         }
 
-        try {
-            isLoading.value = true
+        isLoading.value = true
 
-            val updated = userRepo.updateUser(
-                id,
-                UserRemote(
-                    _id = id,
-                    fullName = fullName,
-                    phone = phone,
-                    email = email,
-                    password = newPassword ?: "",
-                    role = role.value
-                )
+        try {
+            val body = UserRemote(
+                _id = id,
+                fullName = fullName,
+                phone = phone,
+                email = email,
+                password = newPassword ?: "",
+                role = role.value
             )
+
+            val updated = userRepo.updateUser(id, body)
 
             this@AuthViewModel.fullName.value = updated.fullName
             this@AuthViewModel.phone.value = updated.phone
@@ -130,12 +129,19 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
             onSuccess()
 
+        } catch (e: retrofit2.HttpException) {
+            if (e.code() == 409) {
+                onError("Este correo ya está registrado")
+            } else {
+                onError("Error actualizando usuario")
+            }
         } catch (e: Exception) {
-            onError(e.message ?: "Error actualizando usuario")
+            onError("Error actualizando usuario")
         } finally {
             isLoading.value = false
         }
     }
+
 
 
     // ----------------------------------------------------
