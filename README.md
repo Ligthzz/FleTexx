@@ -1,6 +1,7 @@
 # **FLETEX — Aplicación Móvil para Gestión de Fletes**
 
-> Proyecto desarrollado en **Android Studio (Kotlin + Jetpack Compose)** aplicando arquitectura **MVVM**, persistencia local con **Room**, e integración de recursos nativos como **GPS y Cámara**.
+> Aplicación móvil desarrollada en Kotlin + Jetpack Compose, integrada con un backend propio en Node.js / Express / MongoDB, y consumo de API externa para clima y mapas.
+Proyecto creado para la Evaluación Parcial 4 – DSY1105, Duoc UC..
 
 ---
 
@@ -42,48 +43,74 @@ El proyecto está desarrollado en **Kotlin** usando **Jetpack Compose** con el p
 - Formularios adaptables a distintos tamaños de pantalla.  
 - Retroalimentación visual: loaders, íconos de error, mensajes dinámicos.  
 
-###  Persistencia local
-- Base de datos **Room** con entidad `User`.  
-- `UserRepository` que centraliza operaciones CRUD (`insert`, `select`, etc.).  
 
-###  Gestión del estado
-- Uso de `State`, `mutableStateOf` y `StateFlow` para sincronizar la UI con la lógica de negocio.  
-- Estados visuales que responden a acciones del usuario en tiempo real (por ejemplo, mostrar loader durante el login).  
+---
+## **Funcionalidades principales**
+Crear usuarios
+Iniciar sesión
+Editar perfil
+Cambiar contraseña y correo
+Agregar vehículo
+Editar vehículo
+Eliminar vehículo    
+Ver vehículos propios
+Vista de mapa con GPS
+Vista de clima por localidad (API externa)
+Render de pantallas según rol (normal / fletero)
 
 ---
 
-##  **Estructura del proyecto**
 
-### Arquitectura MVVM
+## **Endpoints utilizados (API externa y microservicio)
+**
 
-- **Model**  Define la estructura de datos ->  `User.kt` 
-- **Repository**  Gestiona la comunicación con Room -> `UserRepository.kt`, `UserDao.kt` 
-- **ViewModel**  Contiene la lógica de negocio y los estados -> `AuthViewModel.kt`, `MainViewModel.kt` 
-- **View (UI)** Renderiza la interfaz con Jetpack Compose -> `LoginScreen.kt`, `RegisterScreen.kt`, `ProfileScreen.kt`, etc. 
+Base URL: https://TU_BACKEND/api
+
+Usuarios
+	•	POST /users/register
+	•	POST /users/login
+	•	GET /users/:id
+	•	PUT /users/:id
+	•	DELETE /users/:id
+
+Vehículos
+	•	POST /vehicles
+	•	GET /vehicles/user/:userId
+	•	PUT /vehicles/:id
+	•	DELETE /vehicles/:id
+
+API Externa Integrada (Clima – OpenWeatherMap)
+	•	GET https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}
+Se muestra temperatura, condiciones y ubicación en la interfaz.
 
 ---
+##  **ARQUITECTURA**
 
-## 🚀 **Cómo ejecutar el proyecto**
+MVVM
+>Jetpack Compose
+>StateFlow
+>Retrofit
+>Coroutines
+>MongoDB Atlas
+>Node.js + Express
+---
 
-### 1.- Clonar el repositorio
-```bash
-git clone https://github.com/tuusuario/Fletex.git
-```
-### 2.- Abrir en Android Studio
+##  **Cómo ejecutar el proyecto**
 
-Abrir la carpeta del proyecto.
+### 1.	Clonar el repositorio:
+git clone https://github.com/TU_USUARIO/FleTeX.git
+### 2.	Abrir en Android Studio
+### 3.	Sincronizar Gradle
+### 4.	Ejecutar en emulador o dispositivo físico
 
-Esperar a que Gradle sincronice automáticamente las dependencias.
+Backend
+### 1.	Instalar Node.js
+### 2.	En la carpeta /backend ejecutar:
+npm install
+npm run dev
 
-### 3.- Configurar la API Key de Google Maps
+### 3.	Configurar .env con tu cadena de MongoDB Atlas
 
-Edita el archivo AndroidManifest.xml e inserta tu API Key:
-
-```bash
-<meta-data
-    android:name="com.google.android.geo.API_KEY"
-    android:value="TU_API_KEY_AQUI" />
-```
 ### 4.- ejecutar app
 - Conectar a telefono o hacerlo desde el emulador
 - Presiona ▶️ Run ‘app’ en Android Studio
@@ -98,20 +125,23 @@ Abrir la pantalla Ruta para visualizar tu ubicación.
 
 Probar la cámara desde la pantalla de Chat.
 
+Probar el mapa
+
+Probar el tiempo
+
+Probar logica de vehiculos
+
 Probar validaciones.
 
 Probar la lista de usuarios.
 
 ---
 
-## Tecnologias utilizadas
-- lenguaje: kotlin
-- Arquitectura: MVVM
-- Persistencia: Room (SQLite local)
-- Navegación:	Accompanist Navigation Animation
-- Recursos nativos:	CameraX, Google Maps Compose
-- Lógica asíncrona:	Kotlin Coroutines + StateFlow
-- Carga de imágenes:	Coil
+## APK Firmado y Llave
+En la carpeta /release del repositorio se incluye:
+- app-release.apk (APK firmado)
+- fletex-key.jks (llave de firma)
+
 
 ---
 
@@ -120,7 +150,7 @@ Este protecto fue desarrollado con fines académicos para la asignatura de Desar
 Su código puede ser reutilizado.
 
 ## Contacto
->Desarrollado por Joscelynne Díaz Zavala; Joaquin Alonso Medina Villa; Valentina Ignacia Morales Figueroa.
+> Desarrollado por Joscelynne Díaz Zavala; Joaquin Alonso Medina Villa.
 >Duoc UC — Ingeniería Informática
 
 
