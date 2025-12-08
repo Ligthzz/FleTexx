@@ -26,37 +26,25 @@ El proyecto está desarrollado en **Kotlin** usando **Jetpack Compose** con el p
 
 ---
 
-## **Funcionalidades implementadas**
-
-###  Autenticación y gestión de usuarios
-- Registro de usuarios con validaciones por campo.  
-- Inicio de sesión con verificación local (Room).  
-- Visualización del perfil del usuario y lista de usuarios registrados.  
-
-###  Recursos nativos
-- **GPS:** integración con *Google Maps Compose* para mostrar rutas y ubicación en tiempo real.  
-- **Cámara:** implementación de *CameraX* para tomar fotografías y previsualizarlas en la interfaz.  
-
-###  Interfaz y usabilidad
-- Diseño coherente con **Material Design 3**.  
-- Navegación fluida y animada mediante `AnimatedNavHost`.  
-- Formularios adaptables a distintos tamaños de pantalla.  
-- Retroalimentación visual: loaders, íconos de error, mensajes dinámicos.  
-
-
----
 ## **Funcionalidades principales**
-Crear usuarios
-Iniciar sesión
-Editar perfil
-Cambiar contraseña y correo
-Agregar vehículo
-Editar vehículo
-Eliminar vehículo    
-Ver vehículos propios
-Vista de mapa con GPS
-Vista de clima por localidad (API externa)
-Render de pantallas según rol (normal / fletero)
+### Autenticación y usuario
+- Registro de usuario
+- Inicio de sesión
+- Edición de perfil
+- Cambio de correo
+- Cambio de contraseña
+- Eliminación de cuenta
+
+### Vehículos
+- Agregar vehículo
+- Editar vehículo
+- Eliminar vehículo
+- Ver vehículos del usuario
+- Cambio automático de rol según cantidad de vehículos
+
+### Recursos externos
+- API de clima: temperatura y condiciones por localidad
+- GPS + Mapa: vista de ubicación del usuari
 
 ---
 
@@ -83,16 +71,6 @@ API Externa Integrada (Clima – OpenWeatherMap)
 	•	GET https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}
 Se muestra temperatura, condiciones y ubicación en la interfaz.
 
----
-##  **ARQUITECTURA**
-
-MVVM
->Jetpack Compose
->StateFlow
->Retrofit
->Coroutines
->MongoDB Atlas
->Node.js + Express
 ---
 
 ##  **Cómo ejecutar el proyecto**
@@ -145,12 +123,15 @@ En la carpeta /release del repositorio se incluye:
 
 ---
 
+### validaciones y pruebas hechas por postman
+
+---
 ## Licencia
 Este protecto fue desarrollado con fines académicos para la asignatura de Desarrollo de Aplicaciones Móviles en Duoc UC.
 Su código puede ser reutilizado.
 
 ## Contacto
 > Desarrollado por Joscelynne Díaz Zavala; Joaquin Alonso Medina Villa.
->Duoc UC — Ingeniería Informática
+> Duoc UC — Ingeniería Informática
 
 
