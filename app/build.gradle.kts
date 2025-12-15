@@ -42,7 +42,9 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.junit.junit)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:5.11.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
