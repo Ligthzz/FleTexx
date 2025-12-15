@@ -124,14 +124,31 @@ En la carpeta /release del repositorio se incluye:
 ---
 
 ### validaciones y pruebas hechas por postman
+### incorporacion de testing por junit
 
 ---
+
+## Código fuente de microservicios 
+```bash
+import mongoose from 'mongoose';
+import 'dotenv/config.js';
+
+const uri = process.env.MONGODB_URI;
+mongoose.connect(uri, { dbName: uri.split('/').pop() })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => {
+    console.error('MongoDB error:', err.message);
+    process.exit(1);
+  });
+```
+---
+
 ## Licencia
 Este protecto fue desarrollado con fines académicos para la asignatura de Desarrollo de Aplicaciones Móviles en Duoc UC.
 Su código puede ser reutilizado.
 
 ## Contacto
-> Desarrollado por Joscelynne Díaz Zavala; Joaquin Alonso Medina Villa.
+> Desarrollado por Joscelynne Joice Díaz Zavala; Joaquin Alonso Medina Villa.
 > Duoc UC — Ingeniería Informática
 
 
